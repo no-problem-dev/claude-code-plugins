@@ -5,7 +5,7 @@ Claude Code プラグインマーケットプレイス
 ## インストール
 
 ```bash
-/plugin marketplace add no-problem-kyoichi/claude-code-plugins
+/plugin marketplace add no-problem-dev/claude-code-plugins
 ```
 
 ## プラグイン一覧
