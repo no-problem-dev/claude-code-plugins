@@ -1,0 +1,28 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "no-problem-plugins",
+  "version": "1.0.0",
+  "description": "Claude Code plugin marketplace - workflow automation, iOS development, and productivity tools",
+  "owner": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "plugins": [
+    {
+      "name": "release-flow",
+      "description": "リリースワークフロー自動化 - CHANGELOG管理、セマンティックバージョニング、GitHub Release自動化",
+      "version": "1.0.0",
+      "source": "./plugins/release-flow",
+      "category": "workflow",
+      "tags": ["release", "changelog", "versioning", "github", "automation"]
+    },
+    {
+      "name": "ios-architecture",
+      "description": "iOS開発ベストプラクティス - Clean Architecture、SwiftUI、Swift Package Manager マルチモジュール構成",
+      "version": "1.0.0",
+      "source": "./plugins/ios-architecture",
+      "category": "development",
+      "tags": ["ios", "swift", "swiftui", "architecture", "clean-architecture", "spm"]
+    }
+  ]
+}

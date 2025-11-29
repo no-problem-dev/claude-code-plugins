@@ -1,0 +1,12 @@
+{
+  "name": "release-flow",
+  "version": "1.0.0",
+  "description": "Automated release workflow management with CHANGELOG, semantic versioning, and GitHub Release automation",
+  "author": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "keywords": ["release", "changelog", "versioning", "github", "automation"],
+  "commands": "./commands/",
+  "skills": "./skills/"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "ios-architecture",
+  "version": "1.0.0",
+  "description": "iOS Clean Architecture skill from Stockle project",
+  "author": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "keywords": ["ios", "swift", "swiftui", "architecture", "clean-architecture", "spm"],
+  "skills": "./skills/"
+}

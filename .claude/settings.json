@@ -1,0 +1,11 @@
+{
+  "marketplaces": [
+    {
+      "name": "anthropic-official",
+      "source": "https://github.com/anthropics/claude-code"
+    }
+  ],
+  "plugins": [
+    "plugin-dev@anthropic-official"
+  ]
+}
