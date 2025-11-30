@@ -1,0 +1,12 @@
+{
+  "name": "notify-on-stop",
+  "version": "1.0.0",
+  "description": "Claude Code の停止・権限要求時に Slack とローカル通知を送信",
+  "author": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "keywords": ["notification", "slack", "macos", "hooks", "productivity"],
+  "commands": "./commands/",
+  "hooks": "./hooks/"
+}

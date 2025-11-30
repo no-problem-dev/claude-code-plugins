@@ -4,9 +4,15 @@
 
 ## インストール
 
+### 1. マーケットプレイスの追加（初回のみ）
+
 ```bash
-/plugin install release-flow@no-problem-plugins
+/plugin marketplace add no-problem-dev/claude-code-plugins
 ```
+
+### 2. プラグインのインストール
+
+Claude Code の設定画面（`/plugins`）から **release-flow** を選択してインストール
 
 ## コマンド
 
