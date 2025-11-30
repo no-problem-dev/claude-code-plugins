@@ -1,0 +1,21 @@
+{
+  "name": "go-backend",
+  "version": "1.0.0",
+  "description": "Go バックエンドのビルド・テスト・Lint コマンド群。API サーバー開発をサポート。",
+  "author": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "keywords": [
+    "go",
+    "golang",
+    "backend",
+    "api",
+    "server",
+    "test",
+    "lint",
+    "swagger"
+  ],
+  "commands": "commands",
+  "skills": "skills"
+}
