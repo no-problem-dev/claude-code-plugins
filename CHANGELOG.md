@@ -7,7 +7,28 @@
 
 ## [未リリース]
 
-なし
+## [1.0.5] - 2025-11-30
+
+### 追加
+
+- **swift-design-system**: no problem製 swift-design-system パッケージを使用した iOS UI 実装スキル
+  - 3層トークンシステム（Primitive → Semantic → Component）のリファレンス
+  - デザイントークン: カラー、タイポグラフィ、スペーシング、角丸、モーション、エレベーション
+  - UIコンポーネント: Button, Card, Chip, FAB, Snackbar
+  - Picker コンポーネント: ColorPicker, EmojiPicker, IconPicker, ImagePicker
+  - レイアウトパターン: AspectGrid, SectionCard, Theme
+
+### 変更
+
+- **ios-architecture, release-flow**: plugin.json の description を日本語化
+  - 全プラグインの説明文を統一して日本語に
+
+### 修正
+
+- **ios-dev**: シミュレーターログ表示を改善
+  - 起動中のシミュレーター名を正しく表示するよう修正
+  - `get_booted_simulator_name()` 関数を追加
+  - ios-check, ios-build, ios-test スクリプトで実際のシミュレーター名を表示
 
 ## [1.0.4] - 2025-11-30
 
@@ -76,6 +97,7 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.5]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.5
 [1.0.4]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.4
 [1.0.3]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.3
 [1.0.2]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.2
@@ -89,3 +111,5 @@
 <!-- Auto-generated on 2025-11-30T00:45:09Z by release workflow -->
 
 <!-- Auto-generated on 2025-11-30T02:43:29Z by release workflow -->
+
+<!-- Auto-generated on 2025-11-30T03:05:12Z by release workflow -->
