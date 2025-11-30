@@ -1,0 +1,21 @@
+{
+  "name": "ios-dev",
+  "version": "1.0.0",
+  "description": "iOS/Swift/Xcode のビルド・テスト・実行コマンド群。SPMパッケージ構成のiOSアプリ開発をサポート。",
+  "author": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "keywords": [
+    "ios",
+    "swift",
+    "xcode",
+    "xcodebuild",
+    "spm",
+    "simulator",
+    "build",
+    "test"
+  ],
+  "commands": "commands",
+  "skills": "skills"
+}
