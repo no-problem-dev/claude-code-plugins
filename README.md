@@ -23,6 +23,7 @@ Claude Code プラグインマーケットプレイス
 | プラグイン | 説明 |
 |-----------|------|
 | [ios-architecture](./plugins/ios-architecture/) | iOS Clean Architecture スキル |
+| [swift-design-system](./plugins/swift-design-system/) | Swift Design System UI 実装スキル |
 
 ### ユーティリティ
 
