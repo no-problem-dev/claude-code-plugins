@@ -9,6 +9,16 @@
 
 なし
 
+## [1.0.2] - 2025-11-30
+
+### 修正
+
+- **notify-on-stop**: hooks.json フォーマットを公式プラグイン構造に準拠するよう修正
+  - plugin.json の hooks フィールドをディレクトリからファイルパスに変更
+  - hooks.json に description フィールドを追加
+  - 不要な matcher フィールドを削除
+  - プラグインインストール時にフックが自動的に統合されるよう修正
+
 ## [1.0.1] - 2025-11-30
 
 ### 追加
@@ -32,7 +42,10 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.2]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.2
 [1.0.1]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.1
 [1.0.0]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.0
 
 <!-- Auto-generated on 2025-11-29T23:49:25Z by release workflow -->
+
+<!-- Auto-generated on 2025-11-30T00:23:25Z by release workflow -->
