@@ -31,6 +31,30 @@
       "source": "./plugins/notify-on-stop",
       "category": "productivity",
       "tags": ["notification", "slack", "macos", "hooks", "productivity", "alert"]
+    },
+    {
+      "name": "ios-dev",
+      "description": "iOS/Swift/Xcode ビルド・テスト・実行コマンド群 - SPMパッケージ構成のiOSアプリ開発をサポート",
+      "version": "1.0.0",
+      "source": "./plugins/ios-dev",
+      "category": "development",
+      "tags": ["ios", "swift", "xcode", "xcodebuild", "spm", "simulator", "build", "test"]
+    },
+    {
+      "name": "go-backend",
+      "description": "Go バックエンド ビルド・テスト・Lint コマンド群 - APIサーバー開発をサポート",
+      "version": "1.0.0",
+      "source": "./plugins/go-backend",
+      "category": "development",
+      "tags": ["go", "golang", "backend", "api", "server", "test", "lint", "swagger"]
+    },
+    {
+      "name": "firebase-emulator",
+      "description": "Firebase Emulator Suite 起動・停止・管理コマンド群 - ローカル開発環境をサポート",
+      "version": "1.0.0",
+      "source": "./plugins/firebase-emulator",
+      "category": "development",
+      "tags": ["firebase", "emulator", "firestore", "auth", "storage", "local"]
     }
   ]
 }
