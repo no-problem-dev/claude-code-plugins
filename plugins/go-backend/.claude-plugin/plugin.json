@@ -16,6 +16,6 @@
     "lint",
     "swagger"
   ],
-  "commands": "commands",
-  "skills": "skills"
+  "commands": "./commands/",
+  "skills": "./skills/"
 }
