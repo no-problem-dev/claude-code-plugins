@@ -9,6 +9,25 @@
 
 なし
 
+## [1.0.3] - 2025-11-30
+
+### 追加
+
+- **ios-dev**: iOS/Swift/Xcode ビルド・テスト・実行コマンド群
+  - `/ios-check`, `/ios-build`, `/ios-run`, `/ios-test`, `/ios-clean` コマンド
+  - 動的シミュレーターID検出（起動中シミュレーターを自動検出）
+  - SPM パッケージ構成のiOSアプリ開発をサポート
+  - 環境変数によるプロジェクト固有設定の注入に対応
+- **go-backend**: Go バックエンド ビルド・テスト・Lint コマンド群
+  - `/go-build`, `/go-test`, `/go-lint`, `/go-run`, `/go-tidy`, `/go-swagger` コマンド
+  - golangci-lint による静的解析
+  - swag による Swagger ドキュメント自動生成
+  - 環境変数によるプロジェクト固有設定の注入に対応
+- **firebase-emulator**: Firebase Emulator Suite 起動・停止・管理コマンド群
+  - `/emulator-start`, `/emulator-stop`, `/emulator-status` コマンド
+  - バックグラウンドプロセス管理
+  - ポート設定のカスタマイズに対応
+
 ## [1.0.2] - 2025-11-30
 
 ### 修正
@@ -42,6 +61,7 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.3]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.3
 [1.0.2]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.2
 [1.0.1]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.1
 [1.0.0]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.0
