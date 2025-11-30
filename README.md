@@ -14,6 +14,7 @@ Claude Code プラグインマーケットプレイス
 |-----------|------|
 | [release-flow](./plugins/release-flow/) | リリースワークフロー自動化 |
 | [ios-architecture](./plugins/ios-architecture/) | iOS Clean Architecture スキル |
+| [notify-on-stop](./plugins/notify-on-stop/) | 停止・権限要求時に Slack / macOS 通知を送信 |
 
 ## 開発
 

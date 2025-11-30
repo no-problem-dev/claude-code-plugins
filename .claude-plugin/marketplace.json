@@ -23,6 +23,14 @@
       "source": "./plugins/ios-architecture",
       "category": "development",
       "tags": ["ios", "swift", "swiftui", "architecture", "clean-architecture", "spm"]
+    },
+    {
+      "name": "notify-on-stop",
+      "description": "Claude Code停止・権限要求時にSlackとmacOSローカル通知を送信 - 作業完了、入力待ち、権限要求を即座に通知",
+      "version": "1.0.0",
+      "source": "./plugins/notify-on-stop",
+      "category": "productivity",
+      "tags": ["notification", "slack", "macos", "hooks", "productivity", "alert"]
     }
   ]
 }

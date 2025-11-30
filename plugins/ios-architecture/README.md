@@ -4,9 +4,15 @@ iOS Clean Architecture スキル（Stockle プロジェクトより）
 
 ## インストール
 
+### 1. マーケットプレイスの追加（初回のみ）
+
 ```bash
-/plugin install ios-architecture@no-problem-plugins
+/plugin marketplace add no-problem-dev/claude-code-plugins
 ```
+
+### 2. プラグインのインストール
+
+Claude Code の設定画面（`/plugins`）から **ios-architecture** を選択してインストール
 
 ## スキル
 
