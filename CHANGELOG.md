@@ -9,6 +9,21 @@
 
 なし
 
+## [1.0.4] - 2025-11-30
+
+### 修正
+
+- **ios-dev, go-backend, firebase-emulator**: plugin.json の `commands`/`skills` パスを正しいフォーマットに修正
+  - `"./"` プレフィックスを追加（`"commands"` → `"./commands/"`）
+- **notify-on-stop**: `hooks` フィールドを削除（`hooks/hooks.json` は自動読み込みされるため重複エラーになっていた）
+
+### 変更
+
+- **README**: プラグイン一覧をカテゴリ別に整理
+  - 開発ワークフロー: ios-dev, go-backend, firebase-emulator
+  - アーキテクチャ・設計: ios-architecture
+  - ユーティリティ: release-flow, notify-on-stop
+
 ## [1.0.3] - 2025-11-30
 
 ### 追加
@@ -61,6 +76,7 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.4]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.4
 [1.0.3]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.3
 [1.0.2]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.2
 [1.0.1]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.1
@@ -71,3 +87,5 @@
 <!-- Auto-generated on 2025-11-30T00:23:25Z by release workflow -->
 
 <!-- Auto-generated on 2025-11-30T00:45:09Z by release workflow -->
+
+<!-- Auto-generated on 2025-11-30T02:43:29Z by release workflow -->

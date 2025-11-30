@@ -7,6 +7,5 @@
     "email": "info@no-problem-net.com"
   },
   "keywords": ["notification", "slack", "macos", "hooks", "productivity"],
-  "commands": "./commands/",
-  "hooks": "./hooks/hooks.json"
+  "commands": "./commands/"
 }
