@@ -36,10 +36,18 @@ main() {
 
     local simulator
     simulator=$(get_simulator)
-    log_info "シミュレーター: $simulator"
 
     local destination
     destination=$(build_destination "$simulator")
+
+    # 実際に使用するシミュレーター名をログに表示
+    local actual_simulator
+    actual_simulator=$(get_booted_simulator_name)
+    if [[ -n "$actual_simulator" ]]; then
+        log_info "シミュレーター: $actual_simulator (起動中)"
+    else
+        log_info "シミュレーター: $simulator"
+    fi
 
     # テスト実行
     local xcodebuild_args=(

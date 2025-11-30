@@ -118,6 +118,11 @@ get_booted_simulator_id() {
     xcrun simctl list devices | grep "Booted" | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/' | head -1
 }
 
+# 起動中のシミュレーター名を取得
+get_booted_simulator_name() {
+    xcrun simctl list devices | grep "Booted" | sed -E 's/^[[:space:]]*([^(]+)\(.*/\1/' | head -1 | xargs
+}
+
 # xcodebuild destination を構築
 build_destination() {
     local simulator_name="$1"
