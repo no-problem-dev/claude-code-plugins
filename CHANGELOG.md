@@ -36,3 +36,5 @@
 [1.0.0]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.0
 
 <!-- Auto-generated on 2025-11-29T23:49:25Z by release workflow -->
+
+<!-- Auto-generated on 2025-11-30T00:23:25Z by release workflow -->
