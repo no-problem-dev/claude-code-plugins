@@ -7,6 +7,11 @@
 
 ## [未リリース]
 
+### 変更
+
+- **ios-architecture, release-flow**: plugin.json の description を日本語化
+  - 全プラグインの説明文を統一して日本語に
+
 ### 修正
 
 - **ios-dev**: シミュレーターログ表示を改善
