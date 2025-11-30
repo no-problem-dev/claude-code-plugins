@@ -1,7 +1,7 @@
 {
   "name": "release-flow",
   "version": "1.0.0",
-  "description": "Automated release workflow management with CHANGELOG, semantic versioning, and GitHub Release automation",
+  "description": "リリースワークフロー自動化。CHANGELOG管理、セマンティックバージョニング、GitHub Release自動作成をサポート。",
   "author": {
     "name": "no-problem",
     "email": "info@no-problem-net.com"
