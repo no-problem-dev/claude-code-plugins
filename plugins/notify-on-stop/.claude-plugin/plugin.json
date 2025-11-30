@@ -8,5 +8,5 @@
   },
   "keywords": ["notification", "slack", "macos", "hooks", "productivity"],
   "commands": "./commands/",
-  "hooks": "./hooks/"
+  "hooks": "./hooks/hooks.json"
 }
