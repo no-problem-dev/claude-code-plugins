@@ -1,7 +1,7 @@
 {
   "name": "ios-dev",
-  "version": "1.0.0",
-  "description": "iOS/Swift/Xcode のビルド・テスト・実行コマンド群。SPMパッケージ構成のiOSアプリ開発をサポート。",
+  "version": "1.1.0",
+  "description": "iOS/Swift/Xcode のビルド・テスト・実行。xcworkspace 対応、Server-side Swift 対応。ビルドはサブエージェントで実行しコンテキストを節約。",
   "author": {
     "name": "no-problem",
     "email": "info@no-problem-net.com"
@@ -11,11 +11,15 @@
     "swift",
     "xcode",
     "xcodebuild",
+    "xcworkspace",
     "spm",
     "simulator",
     "build",
-    "test"
+    "test",
+    "server-side-swift",
+    "vapor"
   ],
   "commands": "./commands/",
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "agents": "./agents/"
 }
