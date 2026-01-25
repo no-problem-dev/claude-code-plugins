@@ -1,44 +1,91 @@
 ---
-description: リリース準備を開始。CHANGELOGの「未リリース」セクションをバージョン番号に変換し、リリースブランチを作成
+description: Prepare release by updating CHANGELOG and pushing to remote. PR is auto-created by GitHub Actions.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-argument-hint: <version> (例: 1.2.0)
+argument-hint: <version> (e.g., 1.2.0)
 ---
 
-# リリース準備コマンド
+# Release Preparation Command
 
-指定されたバージョンでリリース準備を行います。
+Prepares a release for the specified version.
 
-## 実行手順
+## Workflow
 
-1. **バージョン番号を確認**: $ARGUMENTS で指定されたバージョン（例: 1.2.0）
-2. **現在のブランチを確認**: `git branch --show-current`
-3. **CHANGELOG.mdを読み込み**: 「未リリース」セクションの内容を確認
-4. **リリースブランチ作成**: `release/v<version>` ブランチを作成（まだ存在しない場合）
-5. **CHANGELOG更新**:
-   - 「## [未リリース]」を「## [<version>] - <今日の日付>」に変更
-   - 新しい「## [未リリース]」セクションを追加
-   - 比較リンクを更新
-6. **変更をコミット**: `chore: prepare for v<version> release`
-7. **結果を報告**
+### 1. Preflight Checks (CRITICAL)
 
-## 注意事項
+**Always perform these checks first:**
 
-- バージョン番号はセマンティックバージョニング形式（X.Y.Z）で指定
-- CHANGELOG.mdが存在しない場合は作成
-- 「未リリース」セクションが空の場合は警告
-- 既にそのバージョンのセクションがある場合はエラー
+```bash
+# Fetch latest remote state
+git fetch origin
 
-## 出力例
+# Check current branch
+git branch --show-current
+
+# Check if on correct release branch (release/v<version>)
+# If not on release branch, ask user if they want to create/switch
+
+# Check if local is in sync with remote
+git status -uno
+```
+
+**If local is behind remote:**
+```bash
+git pull origin <branch>
+```
+
+**If local has uncommitted changes:**
+- Warn user and ask how to proceed
+
+### 2. Version Validation
+
+- Validate version from $ARGUMENTS (e.g., 1.2.0)
+- Confirm branch name matches version: `release/v<version>`
+
+### 3. CHANGELOG Update
+
+- Read CHANGELOG.md
+- Find "## [未リリース]" section
+- Convert to "## [<version>] - YYYY-MM-DD"
+- Add new "## [未リリース]" section at top
+- Update comparison links
+
+### 4. Commit
+
+```bash
+git add CHANGELOG.md
+git commit -m "chore: prepare for v<version> release"
+```
+
+### 5. Push to Remote (AUTOMATIC)
+
+**Critical: Always push after commit:**
+```bash
+git push origin release/v<version>
+```
+
+### 6. Report Result
+
+## Important Notes
+
+- Version must follow semantic versioning (X.Y.Z)
+- If "未リリース" section is empty, warn user
+- If version section already exists, show error
+- **DO NOT create PR manually** - GitHub Actions auto-creates it
+
+## Output Example
 
 ```
-✅ リリース準備完了
+✅ Release Preparation Complete
 
-- バージョン: v1.2.0
-- ブランチ: release/v1.2.0
-- CHANGELOG: 更新済み
+- Version: v1.2.0
+- Branch: release/v1.2.0
+- CHANGELOG: Updated
+- Pushed: Yes
 
-次のステップ:
-1. 変更内容を確認: git diff HEAD~1
-2. プッシュ: git push origin release/v1.2.0
-3. PR作成: gh pr create --title "Release v1.2.0" --base main
+📌 Next Step:
+- The release PR was auto-created by GitHub Actions
+- Review and merge: gh pr view
+
+⚠️ Note: Do NOT create PR manually. Check existing PRs:
+  gh pr list --head release/v1.2.0
 ```
