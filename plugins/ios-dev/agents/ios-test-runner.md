@@ -11,40 +11,55 @@ Runs iOS unit tests and returns only a summary (pass/fail counts, failed test de
 
 ## Workflow
 
-1. **Detect project** (same as ios-build-runner):
-   - `*.xcworkspace` (priority)
-   - `*.xcodeproj`
-   - `Package.swift`
+### 1. Detect project (same as ios-build-runner)
+```bash
+find . -maxdepth 2 -name "*.xcworkspace" -type d | grep -v ".xcodeproj/project.xcworkspace"
+```
 
-2. **Get test schemes**:
-   ```bash
-   xcodebuild -list -workspace <name>.xcworkspace
-   ```
+### 2. Get scheme (FAST - avoid xcodebuild -list)
 
-3. **Run tests**:
-   ```bash
-   xcodebuild \
-     -workspace <name>.xcworkspace \
-     -scheme <scheme> \
-     -destination "platform=iOS Simulator,id=<id>" \
-     -configuration Debug \
-     -skipMacroValidation \
-     -skipPackagePluginValidation \
-     -skipPackageUpdates \
-     -parallel-testing-enabled YES \
-     test
-   ```
+**Try common scheme names first:**
+- Workspace/project name
+- "App", "Develop", "Release"
 
-   For SPM:
-   ```bash
-   swift test --parallel
-   ```
+```bash
+# Verify scheme exists without triggering package resolution
+xcodebuild -workspace Foo.xcworkspace -scheme Foo -showBuildSettings 2>&1 | head -3
+```
 
-4. **Run specific tests** (if requested):
-   ```bash
-   xcodebuild test \
-     -only-testing:<Target>/<TestClass>/<testMethod>
-   ```
+### 3. Run tests
+```bash
+xcodebuild \
+  -workspace <name>.xcworkspace \
+  -scheme <scheme> \
+  -destination "platform=iOS Simulator,id=<id>" \
+  -configuration Debug \
+  -skipMacroValidation \
+  -skipPackagePluginValidation \
+  -skipPackageUpdates \
+  -parallel-testing-enabled YES \
+  test 2>&1 | tail -100
+```
+
+For SPM:
+```bash
+swift test --parallel
+```
+
+### 4. Run specific tests (if requested)
+```bash
+xcodebuild test -only-testing:<Target>/<TestClass>/<testMethod>
+```
+
+### 5. Handle package errors
+
+Only resolve when you see:
+- "Dependencies could not be resolved"
+- "missing package product"
+
+```bash
+xcodebuild -resolvePackageDependencies -workspace <name>.xcworkspace
+```
 
 ## Output Format
 
@@ -69,7 +84,6 @@ Runs iOS unit tests and returns only a summary (pass/fail counts, failed test de
 - File: <path>:<line>
 - Expected: <value>
 - Actual: <value>
-- Message: <assertion message>
 
 ### Fix Suggestions
 <recommendations>
@@ -77,6 +91,7 @@ Runs iOS unit tests and returns only a summary (pass/fail counts, failed test de
 
 ## Rules
 
-- Never output full test logs
+- **Avoid `xcodebuild -list`** - triggers slow package resolution
+- Try common scheme names first
 - Report only failed tests with actionable details
-- Include specific file locations for failures
+- Never output full test logs
