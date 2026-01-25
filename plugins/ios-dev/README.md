@@ -1,6 +1,6 @@
 # ios-dev
 
-iOS/Swift/Xcode のビルド・テスト・実行コマンド群。SPMパッケージ構成のiOSアプリ開発をサポート。
+iOS/Swift/Xcode のビルド・テスト・実行。xcworkspace 対応、Server-side Swift 対応。
 
 ## インストール
 
@@ -10,62 +10,86 @@ Claude Code の `/plugins` UI からインストール、または:
 claude plugins:install ios-dev
 ```
 
-## コマンド一覧
+## サブエージェント（推奨）
+
+ビルドやテストは **サブエージェント** で実行することを推奨。独立したコンテキストで動作し、メインの会話コンテキストを消費しません。
+
+| エージェント | 用途 | モデル |
+|-------------|------|--------|
+| **ios-build-runner** | iOS アプリのビルド | Sonnet |
+| **ios-test-runner** | ユニットテスト実行 | Sonnet |
+| **swift-build-runner** | Server-side Swift (SPM) ビルド | Sonnet |
+
+### 使用例
+
+```
+「Reading Memory をビルドして」
+→ ios-build-runner が xcworkspace を検出してビルド実行
+→ サマリーのみ返却（フルログは返さない）
+
+「サーバーをビルドして」
+→ swift-build-runner が Server/Package.swift をビルド
+```
+
+## コマンド（軽量操作向け）
+
+短い出力のクイック操作用:
 
 | コマンド | 説明 |
 |---------|------|
-| `/ios-dev:ios-check` | コンパイルエラーを高速チェック |
-| `/ios-dev:ios-build` | フルビルド実行 |
-| `/ios-dev:ios-run` | シミュレーターで実行 |
-| `/ios-dev:ios-test` | ユニットテスト実行 |
 | `/ios-dev:ios-clean` | ビルドキャッシュクリア |
+| `/ios-dev:ios-check` | コンパイルエラー高速チェック |
 
-## スキル
+## プロジェクト検出順序
 
-**ios-build-workflow**: iOS開発ワークフローの知識が自動適用されます。
+以下の優先順位で自動検出:
 
-以下のキーワードで自動トリガー:
-- `iOSビルド`, `Xcodeエラー`, `コンパイル`
-- `シミュレーター`, `swift build`, `xcodebuild`
+1. **xcworkspace（最優先）** - ユーザーが Xcode で開いているのはワークスペース
+2. **xcodeproj** - ワークスペースがない場合
+3. **Package.swift** - 純粋な SPM プロジェクト
 
-## 環境変数
+※ `.xcodeproj/project.xcworkspace` は除外（内部ファイル）
 
-プロジェクト固有の設定は環境変数で上書き可能:
+## 対応プロジェクト構成
 
-| 変数 | 説明 | デフォルト |
-|------|------|-----------|
-| `IOS_PROJECT` | .xcodeproj パス | 自動検出 |
-| `IOS_SCHEME` | ビルドスキーム | プロジェクト名 |
-| `IOS_SIMULATOR` | シミュレーター名 | `iPhone 16 Pro` |
-
-## プロジェクト構成
-
-このプラグインは以下の構成を自動検出:
-
-### 1. Makefile ベース（推奨）
+### 1. iOS + Server-side Swift（推奨構成）
 
 ```
 project/
-├── Makefile          # ios-check, ios-build 等のターゲット
-└── ios-app/
-    ├── Makefile      # check, build 等のターゲット
-    └── App.xcodeproj
+├── Project.xcworkspace    ← iOS ビルドはこれを使用
+├── iOS/
+│   ├── App.xcodeproj
+│   └── Packages/
+├── Server/
+│   └── Package.swift      ← swift-build-runner で対応
+└── Shared/
+    └── Package.swift
 ```
 
-Makefileターゲットがあれば優先的に使用します。
+### 2. iOS のみ（xcworkspace）
 
-### 2. Xcode プロジェクト直接
+```
+project/
+├── Project.xcworkspace
+└── iOS/
+    ├── App.xcodeproj
+    └── Packages/
+```
+
+### 3. iOS のみ（xcodeproj）
 
 ```
 project/
 └── App.xcodeproj
 ```
 
-### 3. Swift Package Manager
+### 4. Swift Package のみ
 
 ```
 project/
-└── Package.swift
+├── Package.swift
+├── Sources/
+└── Tests/
 ```
 
 ## プラグイン構成
@@ -74,19 +98,13 @@ project/
 ios-dev/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   ├── ios-build.md
+├── agents/                   # サブエージェント（推奨）
+│   ├── ios-build-runner.md
+│   ├── ios-test-runner.md
+│   └── swift-build-runner.md
+├── commands/                 # 軽量コマンド
 │   ├── ios-check.md
-│   ├── ios-clean.md
-│   ├── ios-run.md
-│   └── ios-test.md
-├── scripts/
-│   ├── common.sh       # 共通関数
-│   ├── ios-build.sh
-│   ├── ios-check.sh
-│   ├── ios-clean.sh
-│   ├── ios-run.sh
-│   └── ios-test.sh
+│   └── ios-clean.md
 ├── skills/
 │   └── ios-build-workflow/
 │       └── SKILL.md
@@ -96,17 +114,19 @@ ios-dev/
 ## 推奨ワークフロー
 
 ```
-1. コード変更
-2. /ios-dev:ios-check  → 高速エラーチェック
-3. /ios-dev:ios-build  → フルビルド
-4. /ios-dev:ios-run    → 動作確認
-5. /ios-dev:ios-test   → テスト実行
-6. コミット・PR
+コード変更
+    ↓
+ios-build-runner（ビルド）
+    ↓ 成功
+ios-test-runner（テスト）
+    ↓ 全テストパス
+コミット・PR
 ```
 
 ## 関連プラグイン
 
-- **ios-architecture**: iOS クリーンアーキテクチャの設計原則（補完関係）
+- **ios-architecture**: iOS クリーンアーキテクチャの設計原則
+- **swift-design-system**: Swift Design System を使った UI 実装
 
 ## ライセンス
 
