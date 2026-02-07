@@ -1,74 +1,65 @@
 ---
 name: release-workflow
-description: リリースワークフロー管理スキル。CHANGELOG更新、セマンティックバージョニング、GitHub Release作成、リリースブランチ運用のベストプラクティスを提供。「リリース」「バージョン」「CHANGELOG」「タグ」「GitHub Release」などのキーワードで自動適用。
+description: リリースワークフロー全体のガイド。CHANGELOG 形式、セマンティックバージョニング、Git フローのベストプラクティス。「release」「リリース」「version」「バージョン」「CHANGELOG」「tag」「GitHub Release」などのキーワードで自動適用。
+disable-model-invocation: true
+context: fork
 ---
 
-# リリースワークフロー管理スキル
+# リリースワークフローガイド（v2.0）
 
-## 概要
+リリースプロセス全体を統合管理するオーケストレーター。
 
-このスキルは、ソフトウェアリリースの標準的なワークフローを支援します。
+## 重要: 明示的な呼び出しのみ
+
+リリース操作はユーザーの明示的な指示で実行すること。プロアクティブに実行しない。
+
+## スキル
+
+| スキル | 用途 | 使いどころ |
+|--------|------|-----------|
+| **release-prepare** | リリース準備 | 「リリース準備」「release prepare」 |
+| **changelog-manage** | CHANGELOG + バージョン管理 | 「CHANGELOG 追加」「バージョン計算」 |
 
 ## 参照ドキュメント
 
-詳細な実装例は以下のファイルを参照してください:
-
-- `references/RELEASE_PROCESS.md` - 完全なリリースプロセスガイド（Stockleプロジェクト実例）
-- `references/auto-release-on-merge.yml` - GitHub Actions ワークフロー実装
+プラグインルートの詳細実装例:
+- `../../references/RELEASE_PROCESS.md` — リリースプロセス完全ガイド
+- `../../references/auto-release-on-merge.yml` — GitHub Actions ワークフロー
 
 ## セマンティックバージョニング
 
-[Semantic Versioning 2.0.0](https://semver.org/lang/ja/) に準拠します。
+形式: `MAJOR.MINOR.PATCH`（[Semantic Versioning 2.0.0](https://semver.org/)）
 
-### バージョン形式: `MAJOR.MINOR.PATCH`
+| 変更種別 | バージョン | 例 | 説明 |
+|---------|-----------|-----|------|
+| バグ修正のみ | PATCH | 1.0.0 → 1.0.1 | 後方互換のバグ修正 |
+| 新機能追加 | MINOR | 1.0.1 → 1.1.0 | 後方互換の機能追加 |
+| 破壊的変更 | MAJOR | 1.1.0 → 2.0.0 | 互換性のない変更 |
 
-| 変更タイプ | バージョン | 例 | 説明 |
-|-----------|-----------|-----|------|
-| バグ修正のみ | PATCH | 1.0.0 → 1.0.1 | 後方互換性のあるバグ修正 |
-| 新機能追加 | MINOR | 1.0.1 → 1.1.0 | 後方互換性のある機能追加 |
-| 破壊的変更 | MAJOR | 1.1.0 → 2.0.0 | 後方互換性のない変更 |
+プレリリース: `1.0.0-alpha.1`, `1.0.0-beta.1`, `1.0.0-rc.1`
 
-### プレリリースバージョン
+## CHANGELOG 形式
 
-- `1.0.0-alpha.1` - アルファ版
-- `1.0.0-beta.1` - ベータ版
-- `1.0.0-rc.1` - リリース候補
-
-## CHANGELOG フォーマット
-
-[Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) 形式に準拠します。
-
-### 基本構造
+[Keep a Changelog](https://keepachangelog.com/) 準拠:
 
 ```markdown
 # Changelog
-
-このプロジェクトのすべての注目すべき変更はこのファイルに記載されます。
-
-フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
-このプロジェクトは [Semantic Versioning](https://semver.org/lang/ja/) に準拠しています。
 
 ## [未リリース]
 
 ### 追加
 - 新機能の説明
 
-### 変更
-- 既存機能の変更
-
-### 修正
-- バグ修正の説明
-
 ## [1.0.0] - 2025-01-15
 
 ### 追加
-- 初期リリース
+- 初回リリース
 
 [未リリース]: https://github.com/owner/repo/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/owner/repo/releases/tag/v1.0.0
 ```
 
-### 変更の分類
+### カテゴリ
 
 | カテゴリ | 英語 | 説明 |
 |---------|------|------|
@@ -77,136 +68,59 @@ description: リリースワークフロー管理スキル。CHANGELOG更新、�
 | 非推奨 | Deprecated | 将来削除予定の機能 |
 | 削除 | Removed | 削除された機能 |
 | 修正 | Fixed | バグ修正 |
-| セキュリティ | Security | セキュリティ関連の修正 |
-
-### 良いCHANGELOGエントリの書き方
-
-**良い例:**
-```markdown
-### 追加
-- **API**: POST /api/v1/users エンドポイントを追加し、ユーザー登録に対応
-- **iOS**: ダークモードに対応（設定画面から切り替え可能）
-
-### 修正
-- **Backend**: 認証トークンの有効期限切れ時に適切なエラーメッセージを返すよう修正
-```
-
-**悪い例:**
-```markdown
-### 変更
-- いろいろ修正
-- バグ直した
-```
-
-### ポイント
-- プラットフォーム/コンポーネントを明記（**Backend**:, **iOS**:, **API**:）
-- 具体的で詳細な説明
-- ユーザーにとっての価値を明確に
-- 太字で重要なポイントを強調
+| セキュリティ | Security | セキュリティ修正 |
 
 ## リリースブランチ戦略
 
-### Git Flow ベースの運用
-
 ```
-main (本番)
+main (production)
   ├── release/v1.0.0 (リリース準備)
-  ├── release/v1.1.0 (次期リリース)
-  └── feature/* (機能開発)
+  ├── release/v1.1.0 (次のリリース)
+  └── feature/* (開発)
 ```
 
-### リリースフロー
+## リリースフロー
 
-1. **リリースブランチ作成**: `release/vX.Y.Z` を main から作成
-2. **開発**: 機能追加・修正をリリースブランチにマージ
-3. **CHANGELOG更新**: 「未リリース」セクションに変更を記録
-4. **リリース準備**: 「未リリース」を `[X.Y.Z] - YYYY-MM-DD` に変換
-5. **PRマージ**: リリースブランチを main にマージ
-6. **自動処理**: タグ作成 → GitHub Release → 次リリースブランチ作成
+### 重要: PR の自動作成
 
-## GitHub Actions 自動化
+**リリース PR は GitHub Actions が自動作成します。** 手動で作成しないこと。
 
-### リリース自動化ワークフロー例
+### ワークフロー
 
-```yaml
-name: Auto Release on Merge
+1. **リリースブランチ作成**: main から `release/vX.Y.Z`
+2. **開発**: フィーチャーをリリースブランチにマージ
+3. **CHANGELOG 更新**: 「未リリース」セクションにエントリ追加
+4. **リリース準備**: release-prepare スキルを使用
+   - CHANGELOG 更新（未リリース → [X.Y.Z]）
+   - コミット
+   - **リモートに自動プッシュ**
+5. **PR 自動作成**: GitHub Actions が PR を作成
+6. **PR マージ**: 自動リリースがトリガー
 
-on:
-  pull_request:
-    types: [closed]
-    branches: [main]
+### PR マージ後（自動）
 
-jobs:
-  auto-release:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Extract version
-        run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"
-          VERSION="${BRANCH#release/}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Create tag and release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.version }}
-```
-
-## コマンド例
-
-### リリース準備
-```bash
-# リリースブランチを作成
-git checkout -b release/v1.2.0 main
-
-# CHANGELOG更新後
-git add CHANGELOG.md
-git commit -m "chore: prepare for v1.2.0 release"
-git push origin release/v1.2.0
-
-# PRを作成
-gh pr create --title "Release v1.2.0" --base main
-```
-
-### リリース実行
-```bash
-# PRをマージ（自動リリースのトリガー）
-gh pr merge <PR番号> --squash
-
-# リリース確認
-gh release view v1.2.0
-```
+1. タグ作成（vX.Y.Z）
+2. CHANGELOG 付き GitHub Release
+3. 次のリリースブランチ作成
+4. 次のリリース用ドラフト PR
 
 ## トラブルシューティング
 
-### CHANGELOG検証エラー
+### CHANGELOG バリデーションエラー
 
-**エラー**: `CHANGELOG.mdにバージョン [X.Y.Z] のセクションが見つかりません`
+**エラー**: `CHANGELOG.md does not contain version [X.Y.Z] section`
 
-**対処法**:
-1. CHANGELOGのバージョンフォーマット確認: `## [X.Y.Z] - YYYY-MM-DD`
-2. ブランチ名とバージョン番号の一致確認
-3. 修正後、再度コミット・プッシュ
+**対処**:
+1. 形式を確認: `## [X.Y.Z] - YYYY-MM-DD`
+2. バージョンがブランチ名と一致することを確認
+3. 再コミット・再プッシュ
 
 ### タグが既に存在する
 
-**対処法**:
 ```bash
 # リモートタグを削除
 git push origin :refs/tags/vX.Y.Z
-
 # ローカルタグを削除
 git tag -d vX.Y.Z
-
-# GitHub Releaseを手動で削除（Webから）
+# GitHub Release を削除（Web から）
 ```
-
-### バージョン番号を間違えた
-
-**マージ前**: PRを閉じて修正後、再度PR作成
-
-**マージ後**:
-1. タグとGitHub Releaseを削除
-2. CHANGELOGを修正
-3. 正しいバージョンで再リリース

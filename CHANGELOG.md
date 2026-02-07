@@ -7,6 +7,34 @@
 
 ## [未リリース]
 
+## [1.0.6] - 2026-02-07
+
+### 追加
+
+- **ios-dev**: v2.0 — commands → skills/agents アーキテクチャに全面移行
+  - ビルド・テストをサブエージェント化（`ios-build-runner`, `ios-test-runner`）で隔離実行
+  - 診断・プレビュー・情報・メンテナンスを機能別スキルに分割
+  - Xcode MCP ハイブリッド対応（MCP 優先、CLI フォールバック）
+  - 全スキル・エージェントの日本語化
+- **go-backend**: v2.0 — commands → skills/agents アーキテクチャに移行
+  - ビルド・テストをサブエージェント化（`go-build-runner`, `go-test-runner`）
+  - 品質チェック（`go-quality`）、開発サーバー（`go-dev-server`）、メンテナンス（`go-maintenance`）スキルを追加
+- **firebase-emulator**: v2.0 — commands → skills アーキテクチャに移行
+  - エミュレーター操作を `emulator-control` スキルに統合
+  - スクリプトはポート管理ロジックのため維持
+- **release-flow**: v2.0 — commands → skills アーキテクチャに移行
+  - リリース準備（`release-prepare`）、CHANGELOG・バージョン管理（`changelog-manage`）スキルを追加
+
+### 変更
+
+- **全プラグイン**: スキル description を `日本語説明。「keyword」...` パターンに統一
+- **release-flow**: plugin.json description・workflow スキルを日本語化
+
+### 削除
+
+- **go-backend, firebase-emulator, release-flow**: 旧 commands/ ディレクトリを廃止（skills/agents に移行済み）
+- **go-backend**: scripts/ ディレクトリを廃止（ロジックをスキル/エージェントにインライン化）
+
 ## [1.0.5] - 2025-11-30
 
 ### 追加
@@ -97,6 +125,7 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.6]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.6
 [1.0.5]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.5
 [1.0.4]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.4
 [1.0.3]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.3
@@ -113,3 +142,5 @@
 <!-- Auto-generated on 2025-11-30T02:43:29Z by release workflow -->
 
 <!-- Auto-generated on 2025-11-30T03:05:12Z by release workflow -->
+
+<!-- Auto-generated on 2025-11-30T04:03:48Z by release workflow -->

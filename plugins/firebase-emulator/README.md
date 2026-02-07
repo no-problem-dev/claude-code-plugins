@@ -1,6 +1,6 @@
 # firebase-emulator
 
-Firebase Emulator Suite の起動・停止・管理コマンド群。ローカル開発環境をサポート。
+Firebase Emulator Suite の起動・停止・管理。ローカル開発環境をサポート。
 
 ## インストール
 
@@ -10,19 +10,14 @@ Claude Code の `/plugins` UI からインストール、または:
 claude plugins:install firebase-emulator
 ```
 
-## コマンド一覧
-
-| コマンド | 説明 |
-|---------|------|
-| `/firebase-emulator:emulator-start` | エミュレーター起動（バックグラウンド） |
-| `/firebase-emulator:emulator-stop` | エミュレーター停止 |
-| `/firebase-emulator:emulator-status` | 状態確認 |
-
 ## スキル
 
-**firebase-emulator-workflow**: Firebase Emulator 管理の知識が自動適用されます。
+| スキル | 用途 |
+|--------|------|
+| **firebase-emulator-workflow** | Emulator 管理ワークフロー全体のガイド |
+| **emulator-control** | 起動・停止・状態確認 |
 
-以下のキーワードで自動トリガー:
+キーワードで自動トリガーされます:
 - `エミュレーター`, `Firebase`, `Firestore`
 - `Auth`, `ローカル開発`
 
@@ -56,17 +51,15 @@ project/
 firebase-emulator/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   ├── emulator-start.md
-│   ├── emulator-stop.md
-│   └── emulator-status.md
 ├── scripts/
 │   ├── common.sh
 │   ├── emulator-start.sh
 │   ├── emulator-stop.sh
 │   └── emulator-status.sh
 ├── skills/
-│   └── firebase-emulator-workflow/
+│   ├── firebase-emulator-workflow/
+│   │   └── SKILL.md
+│   └── emulator-control/
 │       └── SKILL.md
 └── README.md
 ```
@@ -74,9 +67,9 @@ firebase-emulator/
 ## 推奨ワークフロー
 
 ```
-1. /firebase-emulator:emulator-start  → 開発開始
-2. iOS/Backend 開発
-3. /firebase-emulator:emulator-stop   → 開発終了
+1. emulator-control（起動）→ 開発開始
+2. iOS / Backend 開発
+3. emulator-control（停止）→ 開発終了
 ```
 
 ## 必要なツール

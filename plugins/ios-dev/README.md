@@ -1,6 +1,6 @@
-# ios-dev
+# ios-dev v2.0
 
-iOS/Swift/Xcode のビルド・テスト・実行コマンド群。SPMパッケージ構成のiOSアプリ開発をサポート。
+iOS/Swift/Xcode のビルド・テスト・診断・プレビュー。Xcode MCP ハイブリッド対応。
 
 ## インストール
 
@@ -10,62 +10,84 @@ Claude Code の `/plugins` UI からインストール、または:
 claude plugins:install ios-dev
 ```
 
-## コマンド一覧
+## MCP ハイブリッド設計
 
-| コマンド | 説明 |
-|---------|------|
-| `/ios-dev:ios-check` | コンパイルエラーを高速チェック |
-| `/ios-dev:ios-build` | フルビルド実行 |
-| `/ios-dev:ios-run` | シミュレーターで実行 |
-| `/ios-dev:ios-test` | ユニットテスト実行 |
-| `/ios-dev:ios-clean` | ビルドキャッシュクリア |
+Xcode 26.3 の公式 MCP サーバー（`xcrun mcpbridge`）が利用可能な場合は MCP を優先し、
+利用不可の場合は CLI にフォールバックする。**MCP がなくてもビルド・テストは必ず動く。**
+
+### セットアップ（MCP 機能を使う場合）
+
+```bash
+claude mcp add xcode -- xcrun mcpbridge
+```
+
+## サブエージェント（ビルド・テスト用）
+
+ビルドやテストは **サブエージェント** で実行。独立したコンテキストで動作し、メインの会話を消費しない。
+
+| エージェント | 用途 | モデル |
+|-------------|------|--------|
+| **ios-build-runner** | iOS アプリ / SPM ビルド | Sonnet |
+| **ios-test-runner** | ユニットテスト実行 | Sonnet |
+
+### 使用例
+
+```
+「ビルドして」
+→ ios-build-runner が xcworkspace を検出 → MCP or CLI でビルド → サマリー返却
+
+「テストして」
+→ ios-test-runner が MCP テスト or xcodebuild test で実行 → 結果サマリー返却
+
+「サーバーをビルドして」
+→ ios-build-runner が Package.swift を検出 → swift build で実行
+```
 
 ## スキル
 
-**ios-build-workflow**: iOS開発ワークフローの知識が自動適用されます。
+| スキル | 用途 | MCP |
+|--------|------|-----|
+| **ios-dev-workflow** | 全体のオーケストレーション・使い分けガイド | — |
+| **ios-diagnostics** | エラー・警告チェック | MCP 優先 |
+| **ios-preview-repl** | SwiftUI プレビュー・REPL・Apple ドキュメント | MCP 必須 |
+| **ios-project-info** | スキーム・シミュレータ・ビルド設定一覧 | CLI 専用 |
+| **ios-maintenance** | キャッシュクリア・シミュレータ管理 | CLI 専用 |
 
-以下のキーワードで自動トリガー:
-- `iOSビルド`, `Xcodeエラー`, `コンパイル`
-- `シミュレーター`, `swift build`, `xcodebuild`
+## プロジェクト検出順序
 
-## 環境変数
+1. **xcworkspace**（最優先）— `.xcodeproj/project.xcworkspace` は除外
+2. **xcodeproj** — ワークスペースがない場合
+3. **Package.swift** — 純粋な SPM プロジェクト
 
-プロジェクト固有の設定は環境変数で上書き可能:
+## 対応プロジェクト構成
 
-| 変数 | 説明 | デフォルト |
-|------|------|-----------|
-| `IOS_PROJECT` | .xcodeproj パス | 自動検出 |
-| `IOS_SCHEME` | ビルドスキーム | プロジェクト名 |
-| `IOS_SIMULATOR` | シミュレーター名 | `iPhone 16 Pro` |
-
-## プロジェクト構成
-
-このプラグインは以下の構成を自動検出:
-
-### 1. Makefile ベース（推奨）
-
+### iOS + Server-side Swift
 ```
 project/
-├── Makefile          # ios-check, ios-build 等のターゲット
-└── ios-app/
-    ├── Makefile      # check, build 等のターゲット
+├── Project.xcworkspace    ← iOS ビルド
+├── iOS/
+│   ├── App.xcodeproj
+│   └── Packages/
+├── Server/
+│   └── Package.swift      ← SPM ビルド
+└── Shared/
+    └── Package.swift
+```
+
+### iOS のみ（xcworkspace / xcodeproj）
+```
+project/
+├── Project.xcworkspace
+└── iOS/
     └── App.xcodeproj
 ```
 
-Makefileターゲットがあれば優先的に使用します。
-
-### 2. Xcode プロジェクト直接
-
+### Swift Package のみ
 ```
 project/
-└── App.xcodeproj
-```
-
-### 3. Swift Package Manager
-
-```
-project/
-└── Package.swift
+├── Package.swift
+├── Sources/
+└── Tests/
 ```
 
 ## プラグイン構成
@@ -74,39 +96,43 @@ project/
 ios-dev/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   ├── ios-build.md
-│   ├── ios-check.md
-│   ├── ios-clean.md
-│   ├── ios-run.md
-│   └── ios-test.md
-├── scripts/
-│   ├── common.sh       # 共通関数
-│   ├── ios-build.sh
-│   ├── ios-check.sh
-│   ├── ios-clean.sh
-│   ├── ios-run.sh
-│   └── ios-test.sh
+├── agents/
+│   ├── ios-build-runner.md    # ビルド（iOS + SPM 統合）
+│   └── ios-test-runner.md     # テスト
 ├── skills/
-│   └── ios-build-workflow/
-│       └── SKILL.md
+│   ├── ios-dev-workflow/      # オーケストレーター
+│   ├── ios-diagnostics/       # エラー・警告チェック
+│   ├── ios-preview-repl/      # プレビュー・REPL・ドキュメント
+│   ├── ios-project-info/      # プロジェクト情報
+│   └── ios-maintenance/       # クリーン・シミュレータ管理
 └── README.md
 ```
 
 ## 推奨ワークフロー
 
 ```
-1. コード変更
-2. /ios-dev:ios-check  → 高速エラーチェック
-3. /ios-dev:ios-build  → フルビルド
-4. /ios-dev:ios-run    → 動作確認
-5. /ios-dev:ios-test   → テスト実行
-6. コミット・PR
+コード変更
+    ↓
+ios-build-runner（ビルド）
+    ↓ 成功
+ios-test-runner（テスト）
+    ↓ 全テストパス
+コミット・PR
 ```
+
+## v1.x からの変更点
+
+- `swift-build-runner` を `ios-build-runner` に統合
+- `commands/` を全削除 → `skills/` に移行
+- Xcode MCP サーバー対応（ハイブリッド設計）
+- SwiftUI プレビュー・REPL・Apple ドキュメント検索を追加
+- プロジェクト情報スキル（スキーム・シミュレータ・ビルド設定）を追加
+- シミュレータ管理機能を追加
 
 ## 関連プラグイン
 
-- **ios-architecture**: iOS クリーンアーキテクチャの設計原則（補完関係）
+- **ios-architecture**: iOS クリーンアーキテクチャの設計原則
+- **swift-design-system**: Swift Design System を使った UI 実装
 
 ## ライセンス
 

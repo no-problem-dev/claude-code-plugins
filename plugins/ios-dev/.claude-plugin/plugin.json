@@ -1,7 +1,7 @@
 {
   "name": "ios-dev",
-  "version": "1.0.0",
-  "description": "iOS/Swift/Xcode のビルド・テスト・実行コマンド群。SPMパッケージ構成のiOSアプリ開発をサポート。",
+  "version": "2.0.0",
+  "description": "iOS/Swift/Xcode のビルド・テスト・診断・プレビュー。Xcode MCP ハイブリッド対応（MCP 優先、CLI フォールバック）。xcworkspace / xcodeproj / SPM 自動検出。",
   "author": {
     "name": "no-problem",
     "email": "info@no-problem-net.com"
@@ -11,11 +11,18 @@
     "swift",
     "xcode",
     "xcodebuild",
+    "xcworkspace",
     "spm",
     "simulator",
     "build",
-    "test"
+    "test",
+    "preview",
+    "swiftui",
+    "diagnostics",
+    "mcp",
+    "server-side-swift",
+    "vapor"
   ],
-  "commands": "./commands/",
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "agents": "./agents/"
 }

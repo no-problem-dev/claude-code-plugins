@@ -1,28 +1,26 @@
 ---
 name: firebase-emulator-workflow
-description: Firebase Emulator Suiteの起動・停止・管理ワークフロー。「エミュレーター」「Firebase」「Firestore」「Auth」「ローカル開発」などのキーワードで自動適用。
+description: Firebase Emulator Suite の起動・停止・管理ワークフロー。「エミュレーター」「Firebase」「Firestore」「Auth」「ローカル開発」などのキーワードで自動適用。
 ---
 
-# Firebase Emulator Workflow
+# Firebase Emulator ワークフロー（v2.0）
 
 Firebase Emulator Suite のローカル開発環境管理ワークフロー。
 
-## コマンド一覧
+## スキル
 
-| コマンド | 用途 |
-|---------|------|
-| `/firebase-emulator:emulator-start` | エミュレーター起動（バックグラウンド） |
-| `/firebase-emulator:emulator-stop` | エミュレーター停止 |
-| `/firebase-emulator:emulator-status` | 状態確認 |
+| スキル | 用途 | 使いどころ |
+|--------|------|-----------|
+| **emulator-control** | 起動・停止・状態確認 | 「エミュレーター起動」「停止」「状態」 |
 
 ## 推奨ワークフロー
 
 ```
-開発開始 → emulator-start（バックグラウンド起動）
+開発開始 → emulator-control（起動）
     ↓
-iOS/Backend 開発
+iOS / Backend 開発
     ↓
-開発終了 → emulator-stop（リソース解放）
+開発終了 → emulator-control（停止）
 ```
 
 ## 環境変数
