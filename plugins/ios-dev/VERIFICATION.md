@@ -14,7 +14,7 @@ cd /path/to/claude-code-plugins/plugins/ios-dev
 - [x] 全 SKILL.md に有効な YAML フロントマター
 - [x] 全 agent .md に有効な YAML フロントマター
 - [x] plugin.json の version が 2.0.0
-- [x] エージェントに MCP 検出パターン（XcodeListWindows）が含まれる
+- [x] ワークフロースキルに MCP 検出パターン（XcodeListWindows）が含まれる
 - [x] 最適化フラグ（-skipMacroValidation 等）が保持されている
 
 ### 自動検証コマンド
@@ -45,8 +45,8 @@ done
 # A7: version が 2.0.0
 grep -q '"2.0.0"' .claude-plugin/plugin.json && echo "PASS: version 2.0.0" || echo "FAIL"
 
-# A8: MCP 検出パターン
-grep -l "XcodeListWindows" agents/*.md | wc -l | grep -q "2" && echo "PASS: MCP pattern in both agents" || echo "FAIL"
+# A8: MCP 検出パターン（ワークフロースキルに移動済み）
+grep -q "XcodeListWindows" skills/ios-dev-workflow/SKILL.md && echo "PASS: MCP pattern in workflow skill" || echo "FAIL"
 
 # A9: 最適化フラグ
 grep -l "skipMacroValidation" agents/*.md | wc -l | grep -q "2" && echo "PASS: optimization flags" || echo "FAIL"
@@ -95,7 +95,9 @@ grep -q '"xcode"' ~/.mcp.json || grep -q '"xcode"' .mcp.json
 ### C0. MCP 接続
 
 - [x] XcodeListWindows が成功する
-- [ ] サブエージェントから MCP ツールにアクセスできる
+- [N/A] ~~サブエージェントから MCP ツールにアクセスできる~~ → プラットフォーム制限で不可と確定（GitHub Issues #13605, #19526）
+- [ ] ワークフロースキル（ios-dev-workflow）から MCP ビルドが動作する
+- [ ] ワークフロースキル（ios-dev-workflow）から MCP テストが動作する
 
 ### C1. MCP ビルド
 
@@ -140,5 +142,5 @@ grep -q '"xcode"' ~/.mcp.json || grep -q '"xcode"' .mcp.json
 - B1: SPM プロジェクトでの swift build / スキーム指定ビルド / パッケージ解決リカバリー
 - B2: CLI での -only-testing 個別テスト
 - B3: ios-maintenance の clean / DerivedData 削除
-- C0: サブエージェント経由での MCP ツールアクセス
+- C0: ワークフロースキルからの MCP ビルド / MCP テスト（スキル層移動後の検証）
 - C4: MCP 未接続時のフォールバック動作全般
