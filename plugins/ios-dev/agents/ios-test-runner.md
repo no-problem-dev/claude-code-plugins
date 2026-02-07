@@ -1,13 +1,16 @@
 ---
 name: ios-test-runner
-description: iOS ユニットテスト・Swift パッケージテストを実行し、簡潔なサマリーを返却する。「test」「unit test」「テスト」「XCTest」「swift test」「テスト走らせて」などのキーワードで自動起動。失敗テストの詳細のみ報告し、フルログは出力しない。隔離コンテキストで実行。Xcode MCP ハイブリッド対応（MCP 優先、CLI フォールバック）。
+description: iOS ユニットテスト・Swift パッケージテストを CLI で実行し、簡潔なサマリーを返却する。「test」「unit test」「テスト」「XCTest」「swift test」「テスト走らせて」などのキーワードで自動起動。失敗テストの詳細のみ報告し、フルログは出力しない。隔離コンテキストで実行。CLI 専用。
 tools: Bash, Read, Glob
 model: sonnet
 ---
 
-# iOS / Swift テストランナー
+# iOS / Swift テストランナー（CLI 専用）
 
-iOS ユニットテストと Swift パッケージテストを実行する。結果はサマリーのみ返却（合格/不合格数、失敗テスト詳細）。
+iOS ユニットテストと Swift パッケージテストを CLI で実行する。結果はサマリーのみ返却（合格/不合格数、失敗テスト詳細）。
+
+> **注意:** MCP テスト（RunAllTests / RunSomeTests）はワークフロースキル層（ios-dev-workflow）で実行される。
+> このエージェントは MCP 利用不可時・スキーム指定時・SPM のフォールバック専用。
 
 ## ワークフロー
 
@@ -20,37 +23,12 @@ ls Package.swift Server/Package.swift Backend/Package.swift 2>/dev/null
 
 ### 2. プロジェクト種別とテスト戦略の判定
 
-#### A. SPM プロジェクト（Package.swift）→ CLI 固定
+#### A. SPM プロジェクト（Package.swift）
 ```bash
 swift test --parallel -j $(sysctl -n hw.ncpu)
 ```
 
-#### B. iOS プロジェクト → MCP ハイブリッド
-
-**Step 0: MCP 可用性チェック**
-
-MCP ツール `XcodeListWindows` を試行する。
-- 成功 → MCP 利用可能
-- 失敗 → CLI のみ
-
-**MCP ルート（MCP 利用可能）:**
-
-テスト一覧を取得:
-```
-GetTestList → テストターゲット・テストケース一覧
-```
-
-全テスト実行:
-```
-RunAllTests → 全テストを実行
-```
-
-個別テスト実行:
-```
-RunSomeTests(tests: ["TargetName/TestClassName/testMethodName"]) → 指定テストのみ実行
-```
-
-**CLI ルート（MCP 利用不可 or スキーム指定あり）:**
+#### B. iOS プロジェクト
 
 ### 3. スキーム取得（高速 — xcodebuild -list を回避）
 
@@ -139,6 +117,5 @@ swift package resolve
 - スキーム一覧取得前によくある名前を先に試す
 - 失敗テストのみアクション可能な詳細付きで報告
 - フルテストログは絶対に出力しない
-- MCP RunAllTests/RunSomeTests は現在の Xcode GUI 設定で実行される
 - SPM プロジェクトは常に CLI（`swift test`）
 - SPM 並列テストには `--parallel -j $(sysctl -n hw.ncpu)` を使用
