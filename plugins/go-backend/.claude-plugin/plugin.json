@@ -1,7 +1,7 @@
 {
   "name": "go-backend",
-  "version": "1.0.0",
-  "description": "Go バックエンドのビルド・テスト・Lint コマンド群。API サーバー開発をサポート。",
+  "version": "2.0.0",
+  "description": "Go バックエンドのビルド・テスト・Lint・Swagger。API サーバー開発をサポート。ビルド・テストはサブエージェントで隔離実行。",
   "author": {
     "name": "no-problem",
     "email": "info@no-problem-net.com"
@@ -16,6 +16,6 @@
     "lint",
     "swagger"
   ],
-  "commands": "./commands/",
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "agents": "./agents/"
 }

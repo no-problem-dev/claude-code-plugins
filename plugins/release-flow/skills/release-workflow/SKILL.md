@@ -1,37 +1,46 @@
 ---
 name: release-workflow
-description: Release workflow guidance. Provides CHANGELOG format, semantic versioning, and Git flow best practices. Use when user mentions "release", "version", "CHANGELOG", "tag", or "GitHub Release".
+description: リリースワークフロー全体のガイド。CHANGELOG 形式、セマンティックバージョニング、Git フローのベストプラクティス。「release」「リリース」「version」「バージョン」「CHANGELOG」「tag」「GitHub Release」などのキーワードで自動適用。
 disable-model-invocation: true
 context: fork
 ---
 
-# Release Workflow Guide
+# リリースワークフローガイド（v2.0）
 
-## Important: Explicit Invocation Only
+リリースプロセス全体を統合管理するオーケストレーター。
 
-This skill requires explicit user invocation via `/release-prepare`. Never execute release operations proactively.
+## 重要: 明示的な呼び出しのみ
 
-## Reference Documents
+リリース操作はユーザーの明示的な指示で実行すること。プロアクティブに実行しない。
 
-See detailed implementation examples in the plugin root:
-- `../../references/RELEASE_PROCESS.md` - Complete release process guide
-- `../../references/auto-release-on-merge.yml` - GitHub Actions workflow
+## スキル
 
-## Semantic Versioning
+| スキル | 用途 | 使いどころ |
+|--------|------|-----------|
+| **release-prepare** | リリース準備 | 「リリース準備」「release prepare」 |
+| **changelog-manage** | CHANGELOG + バージョン管理 | 「CHANGELOG 追加」「バージョン計算」 |
 
-Format: `MAJOR.MINOR.PATCH` ([Semantic Versioning 2.0.0](https://semver.org/))
+## 参照ドキュメント
 
-| Change Type | Version | Example | Description |
-|-------------|---------|---------|-------------|
-| Bug fixes only | PATCH | 1.0.0 → 1.0.1 | Backward compatible fixes |
-| New features | MINOR | 1.0.1 → 1.1.0 | Backward compatible additions |
-| Breaking changes | MAJOR | 1.1.0 → 2.0.0 | Incompatible changes |
+プラグインルートの詳細実装例:
+- `../../references/RELEASE_PROCESS.md` — リリースプロセス完全ガイド
+- `../../references/auto-release-on-merge.yml` — GitHub Actions ワークフロー
 
-Pre-release: `1.0.0-alpha.1`, `1.0.0-beta.1`, `1.0.0-rc.1`
+## セマンティックバージョニング
 
-## CHANGELOG Format
+形式: `MAJOR.MINOR.PATCH`（[Semantic Versioning 2.0.0](https://semver.org/)）
 
-[Keep a Changelog](https://keepachangelog.com/) format:
+| 変更種別 | バージョン | 例 | 説明 |
+|---------|-----------|-----|------|
+| バグ修正のみ | PATCH | 1.0.0 → 1.0.1 | 後方互換のバグ修正 |
+| 新機能追加 | MINOR | 1.0.1 → 1.1.0 | 後方互換の機能追加 |
+| 破壊的変更 | MAJOR | 1.1.0 → 2.0.0 | 互換性のない変更 |
+
+プレリリース: `1.0.0-alpha.1`, `1.0.0-beta.1`, `1.0.0-rc.1`
+
+## CHANGELOG 形式
+
+[Keep a Changelog](https://keepachangelog.com/) 準拠:
 
 ```markdown
 # Changelog
@@ -39,90 +48,79 @@ Pre-release: `1.0.0-alpha.1`, `1.0.0-beta.1`, `1.0.0-rc.1`
 ## [未リリース]
 
 ### 追加
-- New feature description
+- 新機能の説明
 
 ## [1.0.0] - 2025-01-15
 
 ### 追加
-- Initial release
+- 初回リリース
 
 [未リリース]: https://github.com/owner/repo/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/owner/repo/releases/tag/v1.0.0
 ```
 
-### Categories
+### カテゴリ
 
-| Category | English | Description |
-|----------|---------|-------------|
-| 追加 | Added | New features |
-| 変更 | Changed | Changes to existing features |
-| 非推奨 | Deprecated | Features to be removed |
-| 削除 | Removed | Removed features |
-| 修正 | Fixed | Bug fixes |
-| セキュリティ | Security | Security fixes |
+| カテゴリ | 英語 | 説明 |
+|---------|------|------|
+| 追加 | Added | 新機能 |
+| 変更 | Changed | 既存機能の変更 |
+| 非推奨 | Deprecated | 将来削除予定の機能 |
+| 削除 | Removed | 削除された機能 |
+| 修正 | Fixed | バグ修正 |
+| セキュリティ | Security | セキュリティ修正 |
 
-### Good Entry Examples
-
-```markdown
-### 追加
-- **API**: POST /api/v1/users endpoint for user registration
-- **iOS**: Dark mode support (toggle in settings)
-
-### 修正
-- **Backend**: Return proper error message on token expiration
-```
-
-## Release Branch Strategy
+## リリースブランチ戦略
 
 ```
 main (production)
-  ├── release/v1.0.0 (release preparation)
-  ├── release/v1.1.0 (next release)
-  └── feature/* (development)
+  ├── release/v1.0.0 (リリース準備)
+  ├── release/v1.1.0 (次のリリース)
+  └── feature/* (開発)
 ```
 
-## Release Flow
+## リリースフロー
 
-### Critical: Automatic PR Creation
+### 重要: PR の自動作成
 
-**The release PR is created automatically by GitHub Actions.** Do NOT create it manually.
+**リリース PR は GitHub Actions が自動作成します。** 手動で作成しないこと。
 
-### Workflow
+### ワークフロー
 
-1. **Create release branch**: `release/vX.Y.Z` from main
-2. **Develop**: Merge features to release branch
-3. **Update CHANGELOG**: Add entries to "未リリース" section
-4. **Prepare release**: Run `/release-prepare X.Y.Z`
-   - Updates CHANGELOG (未リリース → [X.Y.Z])
-   - Commits changes
-   - **Pushes to remote automatically**
-5. **PR is auto-created**: GitHub Actions creates the PR
-6. **Merge PR**: Triggers automatic release
+1. **リリースブランチ作成**: main から `release/vX.Y.Z`
+2. **開発**: フィーチャーをリリースブランチにマージ
+3. **CHANGELOG 更新**: 「未リリース」セクションにエントリ追加
+4. **リリース準備**: release-prepare スキルを使用
+   - CHANGELOG 更新（未リリース → [X.Y.Z]）
+   - コミット
+   - **リモートに自動プッシュ**
+5. **PR 自動作成**: GitHub Actions が PR を作成
+6. **PR マージ**: 自動リリースがトリガー
 
-### After PR Merge (Automatic)
+### PR マージ後（自動）
 
-1. Tag creation (vX.Y.Z)
-2. GitHub Release with changelog
-3. Next release branch creation
-4. Draft PR for next release
+1. タグ作成（vX.Y.Z）
+2. CHANGELOG 付き GitHub Release
+3. 次のリリースブランチ作成
+4. 次のリリース用ドラフト PR
 
-## Troubleshooting
+## トラブルシューティング
 
-### CHANGELOG validation error
+### CHANGELOG バリデーションエラー
 
-**Error**: `CHANGELOG.md does not contain version [X.Y.Z] section`
+**エラー**: `CHANGELOG.md does not contain version [X.Y.Z] section`
 
-**Fix**:
-1. Verify format: `## [X.Y.Z] - YYYY-MM-DD`
-2. Confirm version matches branch name
-3. Commit and push again
+**対処**:
+1. 形式を確認: `## [X.Y.Z] - YYYY-MM-DD`
+2. バージョンがブランチ名と一致することを確認
+3. 再コミット・再プッシュ
 
-### Tag already exists
+### タグが既に存在する
 
 ```bash
-# Delete remote tag
+# リモートタグを削除
 git push origin :refs/tags/vX.Y.Z
-# Delete local tag
+# ローカルタグを削除
 git tag -d vX.Y.Z
-# Delete GitHub Release (via web)
+# GitHub Release を削除（Web から）
 ```

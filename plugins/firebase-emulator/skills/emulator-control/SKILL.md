@@ -1,0 +1,72 @@
+---
+name: emulator-control
+description: Firebase Emulator の起動・停止・状態確認。「エミュレーター起動」「emulator start」「emulator stop」「エミュレーター停止」「エミュレーター状態」などのキーワードで自動適用。
+---
+
+# Firebase Emulator 操作
+
+Firebase Emulator Suite の起動・停止・状態確認を行う。
+スクリプトによるポート管理・PID 管理を使用。
+
+## 起動
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/emulator-start.sh
+```
+
+Firebase Emulator をバックグラウンドで起動する。
+
+- Firebase ディレクトリを自動検出
+- プロジェクト ID を自動取得
+- ポートの競合を事前チェック
+- 起動後、UI URL とログ場所を表示
+
+### 起動後の確認
+
+```
+http://localhost:4000  （Emulator UI）
+```
+
+## 停止
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/emulator-stop.sh
+```
+
+全エミュレーターサービスのポートプロセスを終了する。
+
+### 使用タイミング
+
+- 開発終了時
+- ポートを解放したい時
+- エミュレーターを再起動したい時
+
+## 状態確認
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/emulator-status.sh
+```
+
+各サービスのポート稼働状況を確認する。
+
+### 表示内容
+
+- Firestore / Auth / Storage / UI の起動状態
+- 使用中のポート
+- 稼働サービス数（X/4）
+
+## 環境変数
+
+| 変数 | 説明 | デフォルト |
+|------|------|-----------|
+| `FIREBASE_DIR` | Firebase ディレクトリ | 自動検出 |
+| `FIREBASE_PROJECT_ID` | プロジェクト ID | 自動検出 |
+| `EMULATOR_PORT_FIRESTORE` | Firestore ポート | 8090 |
+| `EMULATOR_PORT_AUTH` | Auth ポート | 9099 |
+| `EMULATOR_PORT_STORAGE` | Storage ポート | 9199 |
+| `EMULATOR_PORT_UI` | UI ポート | 4000 |
+
+## 前提条件
+
+- Firebase CLI がインストールされている（`npm install -g firebase-tools`）
+- `firebase.json` が存在する

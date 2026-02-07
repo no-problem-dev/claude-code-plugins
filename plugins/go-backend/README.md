@@ -1,6 +1,6 @@
 # go-backend
 
-Go バックエンドのビルド・テスト・Lint コマンド群。API サーバー開発をサポート。
+Go バックエンドのビルド・テスト・Lint・Swagger。API サーバー開発をサポート。
 
 ## インストール
 
@@ -10,24 +10,25 @@ Claude Code の `/plugins` UI からインストール、または:
 claude plugins:install go-backend
 ```
 
-## コマンド一覧
+## エージェント
 
-| コマンド | 説明 |
-|---------|------|
-| `/go-backend:go-build` | バイナリビルド |
-| `/go-backend:go-test` | テスト実行（カバレッジオプション付き） |
-| `/go-backend:go-lint` | 静的解析（golangci-lint） |
-| `/go-backend:go-run` | 開発サーバー起動 |
-| `/go-backend:go-tidy` | 依存関係整理（go mod tidy） |
-| `/go-backend:go-swagger` | Swagger/OpenAPI生成 |
+| エージェント | 用途 |
+|-------------|------|
+| **go-build-runner** | バイナリビルド（隔離実行） |
+| **go-test-runner** | テスト実行（隔離実行） |
+
+ビルド・テストはサブエージェントで実行され、メインコンテキストにログを流しません。
 
 ## スキル
 
-**go-backend-workflow**: Go バックエンド開発ワークフローの知識が自動適用されます。
+| スキル | 用途 |
+|--------|------|
+| **go-backend-workflow** | 開発ワークフロー全体のオーケストレーター |
+| **go-quality** | 静的解析（golangci-lint）+ Swagger 生成 |
+| **go-dev-server** | 開発サーバー起動・管理 |
+| **go-maintenance** | 依存整理（go mod tidy）・キャッシュクリア |
 
-以下のキーワードで自動トリガー:
-- `Goビルド`, `バックエンドテスト`, `golangci-lint`
-- `go mod`, `go test`, `swagger`
+キーワードで自動トリガーされます。
 
 ## 環境変数
 
@@ -43,22 +44,7 @@ claude plugins:install go-backend
 
 このプラグインは以下の構成を自動検出:
 
-### 1. Makefile ベース（推奨）
-
-```
-project/
-├── Makefile          # build, test, lint 等のターゲット
-└── backend/
-    ├── Makefile      # build, test, lint 等のターゲット
-    ├── go.mod
-    └── cmd/
-        └── server/
-            └── main.go
-```
-
-Makefileターゲットがあれば優先的に使用します。
-
-### 2. 標準 Go プロジェクト
+### 1. 標準 Go プロジェクト
 
 ```
 project/
@@ -68,7 +54,7 @@ project/
         └── main.go
 ```
 
-### 3. シンプル構成
+### 2. シンプル構成
 
 ```
 project/
@@ -82,23 +68,17 @@ project/
 go-backend/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   ├── go-build.md
-│   ├── go-lint.md
-│   ├── go-run.md
-│   ├── go-swagger.md
-│   ├── go-test.md
-│   └── go-tidy.md
-├── scripts/
-│   ├── common.sh       # 共通関数
-│   ├── go-build.sh
-│   ├── go-lint.sh
-│   ├── go-run.sh
-│   ├── go-swagger.sh
-│   ├── go-test.sh
-│   └── go-tidy.sh
+├── agents/
+│   ├── go-build-runner.md
+│   └── go-test-runner.md
 ├── skills/
-│   └── go-backend-workflow/
+│   ├── go-backend-workflow/
+│   │   └── SKILL.md
+│   ├── go-quality/
+│   │   └── SKILL.md
+│   ├── go-dev-server/
+│   │   └── SKILL.md
+│   └── go-maintenance/
 │       └── SKILL.md
 └── README.md
 ```
@@ -107,9 +87,9 @@ go-backend/
 
 ```
 1. コード変更
-2. /go-backend:go-build  → ビルド確認
-3. /go-backend:go-test   → テスト実行
-4. /go-backend:go-lint   → 品質チェック
+2. go-build-runner  → ビルド確認
+3. go-test-runner   → テスト実行
+4. go-quality       → 品質チェック
 5. コミット・PR
 ```
 

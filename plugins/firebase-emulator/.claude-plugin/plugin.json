@@ -1,7 +1,7 @@
 {
   "name": "firebase-emulator",
-  "version": "1.0.0",
-  "description": "Firebase Emulator Suite の起動・停止・管理コマンド群。ローカル開発環境をサポート。",
+  "version": "2.0.0",
+  "description": "Firebase Emulator Suite の起動・停止・管理。ローカル開発環境をサポート。",
   "author": {
     "name": "no-problem",
     "email": "info@no-problem-net.com"
@@ -14,6 +14,5 @@
     "storage",
     "local"
   ],
-  "commands": "./commands/",
   "skills": "./skills/"
 }
