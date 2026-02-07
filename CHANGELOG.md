@@ -7,6 +7,16 @@
 
 ## [未リリース]
 
+## [1.0.7] - 2026-02-07
+
+### 変更
+
+- **ios-dev**: MCP ビルド/テスト実行をスキル層に移動（v2.1）
+  - サブエージェントは Claude Code の制限により MCP ツールにアクセスできないため、MCP 実行をワークフロースキル（`ios-dev-workflow`）に引き上げ
+  - `ios-build-runner` / `ios-test-runner` を CLI 専用に簡素化
+  - MCP 利用可能時はスキルで直接 `BuildProject` / `RunAllTests` を実行、不可時はサブエージェントにフォールバック
+  - `VERIFICATION.md` のサブエージェント MCP アクセス項目を N/A に更新
+
 ## [1.0.6] - 2026-02-07
 
 ### 追加
@@ -125,6 +135,7 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.7]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.7
 [1.0.6]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.6
 [1.0.5]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.5
 [1.0.4]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.4
