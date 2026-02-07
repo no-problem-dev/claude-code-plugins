@@ -11,7 +11,7 @@
     {
       "name": "release-flow",
       "description": "リリースワークフロー自動化 - CHANGELOG管理、セマンティックバージョニング、GitHub Release自動化",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "source": "./plugins/release-flow",
       "category": "workflow",
       "tags": ["release", "changelog", "versioning", "github", "automation"]
@@ -43,7 +43,7 @@
     {
       "name": "go-backend",
       "description": "Go バックエンド ビルド・テスト・Lint コマンド群 - APIサーバー開発をサポート",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "source": "./plugins/go-backend",
       "category": "development",
       "tags": ["go", "golang", "backend", "api", "server", "test", "lint", "swagger"]
@@ -51,7 +51,7 @@
     {
       "name": "firebase-emulator",
       "description": "Firebase Emulator Suite 起動・停止・管理コマンド群 - ローカル開発環境をサポート",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "source": "./plugins/firebase-emulator",
       "category": "development",
       "tags": ["firebase", "emulator", "firestore", "auth", "storage", "local"]
