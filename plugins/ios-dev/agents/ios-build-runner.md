@@ -1,51 +1,83 @@
 ---
 name: ios-build-runner
-description: Builds iOS apps and returns a concise summary. Use when the user mentions "build", "compile", "xcodebuild", or asks to build an iOS app. Runs in isolated context to prevent build logs from consuming main conversation. Detects xcworkspace (priority) or xcodeproj automatically.
+description: iOS アプリ・Swift パッケージのビルドを実行し、簡潔なサマリーを返却する。「build」「compile」「ビルド」「コンパイル」「xcodebuild」「swift build」「SPM」「Package.swift」「Vapor」などのキーワードで自動起動。メインコンテキストにログを流さない隔離実行。Xcode MCP ハイブリッド対応（MCP 優先、CLI フォールバック）。xcworkspace > xcodeproj > Package.swift を自動検出。
 tools: Bash, Read, Glob
 model: sonnet
 ---
 
-# iOS Build Runner
+# iOS / Swift ビルドランナー
 
-Builds iOS applications and returns only a summary (success/failure, errors, warnings).
+iOS アプリケーションと Swift パッケージをビルドする。結果はサマリーのみ返却（成功/失敗、エラー、警告）。
 
-## Workflow
+## ワークフロー
 
-### 1. Detect project (priority order)
+### 1. プロジェクト検出（優先順位順）
 ```bash
-# xcworkspace at root (exclude internal ones)
+# ルートの xcworkspace（内部ワークスペースは除外）
 find . -maxdepth 1 -name "*.xcworkspace" -type d | grep -v ".xcodeproj/project.xcworkspace"
-# xcworkspace in subdirectories
+# サブディレクトリの xcworkspace
 find . -maxdepth 2 -name "*.xcworkspace" -type d | grep -v ".xcodeproj/project.xcworkspace"
-# xcodeproj if no workspace
+# ワークスペースがない場合は xcodeproj
 find . -maxdepth 2 -name "*.xcodeproj" -type d
+# Package.swift（SPM）
+ls Package.swift Server/Package.swift Backend/Package.swift 2>/dev/null
 ```
 
-### 2. Get scheme (FAST method - avoid package resolution)
+### 2. プロジェクト種別とビルド戦略の判定
 
-**Try common scheme names first** (no xcodebuild -list needed):
-- Workspace/project name without extension
+#### A. SPM プロジェクト（Package.swift）→ CLI 固定
+MCP は SPM ビルドに対応していないため、CLI で実行。
+
+```bash
+swift build -j $(sysctl -n hw.ncpu)
+
+# Release ビルドの場合
+swift build -c release -j $(sysctl -n hw.ncpu)
+```
+
+#### B. iOS プロジェクト（xcworkspace / xcodeproj）→ MCP ハイブリッド
+
+**Step 0: MCP 可用性チェック**
+
+MCP ツール `XcodeListWindows` を試行する。
+- 成功 → MCP 利用可能
+- 失敗（ツールが存在しない / Xcode 未起動）→ CLI のみ
+
+**MCP ルート（スキーム指定なし & MCP 利用可能）:**
+```
+1. BuildProject で現在の GUI 設定でビルド
+2. GetBuildLog でビルド結果を取得（フィルタ: errors のみ）
+3. サマリーを返却
+```
+
+**CLI ルート（スキーム指定あり or MCP 利用不可）:**
+
+### 3. スキーム取得（高速 — パッケージ解決を回避）
+
+**よくあるスキーム名を先に試す**（xcodebuild -list 不要）:
+- ワークスペース/プロジェクト名（拡張子なし）
 - "App", "Develop", "Release", "Debug"
 
 ```bash
-# Try build directly with guessed scheme - this is faster than -list
+# 推測したスキームで直接ビルド設定を確認 — -list より高速
 xcodebuild -workspace Foo.xcworkspace -scheme Foo -showBuildSettings 2>&1 | head -5
-# If "error: The scheme is not found" -> try next scheme name
+# "error: The scheme is not found" → 次の候補を試す
 ```
 
-**Only if needed** (triggers package resolution - slow):
+**全推測が失敗した場合のみ**（パッケージ解決が走る — 低速）:
 ```bash
 xcodebuild -list -workspace <name>.xcworkspace -skipPackageUpdates
 ```
 
-### 3. Get simulator
+### 4. シミュレータ取得
 ```bash
-# Use booted simulator (fast)
+# 起動中のシミュレータを使用（高速）
 xcrun simctl list devices | grep "Booted" | head -1
-# Or use default
+# または利用可能な iPhone シミュレータ
+xcrun simctl list devices available | grep "iPhone" | head -1
 ```
 
-### 4. Build
+### 5. ビルド実行（CLI）
 ```bash
 xcodebuild \
   -workspace <name>.xcworkspace \
@@ -59,31 +91,36 @@ xcodebuild \
   build 2>&1 | tail -50
 ```
 
-**Note:** `-skipPackageUpdates` skips fetching updates but uses existing resolved packages.
+**注意:** `-skipPackageUpdates` は更新取得をスキップするが、既存の解決済みパッケージは使用する。
 
-### 5. Handle package resolution errors
+### 6. パッケージ解決エラーの処理
 
-Only resolve packages when you see these errors:
+以下のエラーが出た場合のみパッケージ解決を実行:
 - "Dependencies could not be resolved"
 - "Package.resolved is out of sync"
 - "missing package product"
 
-Then run:
 ```bash
 xcodebuild -resolvePackageDependencies -workspace <name>.xcworkspace
 ```
 
-## Output Format
+SPM の場合:
+```bash
+swift package resolve
+```
 
-**Success:**
+## 出力フォーマット
+
+**成功時:**
 ```
 ## Build Succeeded
 - Project: <name>
 - Scheme: <scheme>
+- Type: iOS / SPM
 - Warnings: <count>
 ```
 
-**Failure:**
+**失敗時:**
 ```
 ## Build Failed
 - Project: <name>
@@ -96,9 +133,12 @@ xcodebuild -resolvePackageDependencies -workspace <name>.xcworkspace
 <recommendations>
 ```
 
-## Rules
+## ルール
 
-- **Avoid `xcodebuild -list`** - it triggers slow package resolution
-- Try common scheme names first before listing
-- Never output full build logs
-- Only resolve packages when errors indicate it's needed
+- **`xcodebuild -list` を避ける** — パッケージ解決が走り低速になる
+- スキーム一覧取得前によくある名前を先に試す
+- フルビルドログは絶対に出力しない
+- パッケージ解決はエラーで必要と判明した場合のみ実行
+- MCP BuildProject にはスキーム/デスティネーション制御がない — スキーム指定時は CLI を使用
+- SPM プロジェクトは常に CLI（`swift build`）
+- SPM 並列ビルドには `-j $(sysctl -n hw.ncpu)` を使用
