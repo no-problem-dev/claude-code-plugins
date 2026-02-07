@@ -9,7 +9,6 @@
 #   SLACK_WEBHOOK_URL     - Slack Incoming Webhook URL
 #
 # 環境変数（通知設定）:
-#   NOTIFY_SOUND          - 通知音 (デフォルト: Glass)
 #   NOTIFY_SLACK_ENABLED  - Slack通知の有効化 (true/false, デフォルト: true)
 #   NOTIFY_LOCAL_ENABLED  - ローカル通知の有効化 (true/false, デフォルト: true)
 # ============================================================================
@@ -18,7 +17,6 @@ set -euo pipefail
 
 # --- 設定 ---
 EVENT_TYPE="${1:-unknown}"
-SOUND="${NOTIFY_SOUND:-Glass}"
 SLACK_ENABLED="${NOTIFY_SLACK_ENABLED:-true}"
 LOCAL_ENABLED="${NOTIFY_LOCAL_ENABLED:-true}"
 
@@ -50,8 +48,6 @@ get_task_summary() {
     return
   fi
 
-  # トランスクリプトの最後の assistant メッセージから要約を抽出
-  # 最後の数行を取得し、テキスト部分を抽出
   local summary
   summary=$(tail -20 "$transcript_path" 2>/dev/null | \
     grep -o '"text":"[^"]*"' | \
@@ -67,67 +63,77 @@ get_task_summary() {
 }
 
 # --- イベント別のメッセージ設定 ---
+# 各イベントで音・emoji・色を完全に分けて、聞くだけ/見るだけで何が起きたかわかるようにする
+#
+#   stop        完了（穏やか）     Glass   緑  ✅
+#   notification 入力待ち（注意）   Ping    黄  👋
+#   permission   権限要求（緊急）   Sosumi  赤  🔐
+#   subagent     サブ完了（軽い）   Tink    青  ⚡
 get_message_config() {
   local event="$1"
   local title=""
   local message=""
   local detail=""
   local emoji=""
-  local sound="$SOUND"
+  local sound=""
+  local color=""
 
   case "$event" in
     stop)
-      title="Claude Code"
+      title="完了"
       message="作業が完了しました"
       emoji="white_check_mark"
-      # タスク要約を取得
+      sound="Glass"
+      color="#2ea44f"
       detail=$(get_task_summary)
       ;;
     notification)
-      title="Claude Code"
-      # hooks から渡されたメッセージを使用
-      local hook_message
+      title="入力待ち"
       hook_message=$(get_json_field "message")
       if [[ -n "$hook_message" ]]; then
         message="$hook_message"
       else
         message="入力を待っています"
       fi
-      emoji="bell"
-      sound="Basso"
+      emoji="wave"
+      sound="Ping"
+      color="#d29922"
       ;;
     subagent)
-      title="Claude Code"
+      title="サブエージェント完了"
       message="サブエージェントが完了しました"
-      emoji="robot_face"
+      emoji="zap"
+      sound="Tink"
+      color="#388bfd"
       ;;
     permission)
-      title="Claude Code - 確認が必要"
-      # ツール名と入力を取得
+      title="権限が必要"
       local tool_name tool_input
       tool_name=$(get_json_field "tool_name")
       tool_input=$(get_json_field "tool_input")
 
       if [[ -n "$tool_name" ]]; then
-        message="権限を求めています: $tool_name"
-        # tool_input から詳細を抽出（最初の100文字）
+        message="$tool_name の実行許可が必要です"
         if [[ -n "$tool_input" ]]; then
           detail=$(echo "$tool_input" | jq -r 'if type == "object" then (to_entries | map("\(.key): \(.value)") | join(", ")) else . end' 2>/dev/null | head -c 100)
         fi
       else
-        message="権限の許可を求めています"
+        message="権限の許可が必要です"
       fi
-      emoji="warning"
-      sound="Basso"
+      emoji="lock"
+      sound="Sosumi"
+      color="#da3633"
       ;;
     *)
       title="Claude Code"
       message="通知があります"
       emoji="speech_balloon"
+      sound="Glass"
+      color="#848d97"
       ;;
   esac
 
-  echo "$title|$message|$detail|$emoji|$sound"
+  echo "$title|$message|$detail|$emoji|$sound|$color"
 }
 
 # --- macOS ローカル通知 ---
@@ -146,8 +152,7 @@ send_local_notification() {
     full_message="$message\n$detail"
   fi
 
-  # osascript を使用（依存関係なし）
-  osascript -e "display notification \"$full_message\" with title \"$title\" sound name \"$sound\"" 2>/dev/null || true
+  osascript -e "display notification \"$full_message\" with title \"Claude Code - $title\" sound name \"$sound\"" 2>/dev/null || true
 }
 
 # --- Slack 通知 ---
@@ -156,39 +161,47 @@ send_slack_notification() {
   local message="$2"
   local detail="$3"
   local emoji="$4"
+  local color="$5"
 
   if [[ "$SLACK_ENABLED" != "true" ]]; then
     return 0
   fi
 
-  # メッセージ本文を構築
-  local text=":${emoji}: *${title}*\n${message}"
+  if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
+    return 0
+  fi
+
+  # detail があれば付加
+  local detail_block=""
   if [[ -n "$detail" ]]; then
-    text="${text}\n\`\`\`${detail}\`\`\`"
+    detail_block=", {\"type\": \"context\", \"elements\": [{\"type\": \"mrkdwn\", \"text\": \"\`$detail\`\"}]}"
   fi
 
   local payload
   payload=$(cat <<EOF
 {
-  "blocks": [
+  "attachments": [
     {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "${text}"
-      }
+      "color": "${color}",
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": ":${emoji}: *${title}*  ${message}"
+          }
+        }${detail_block}
+      ]
     }
   ]
 }
 EOF
 )
 
-  if [[ -n "${SLACK_WEBHOOK_URL:-}" ]]; then
-    curl -s -X POST \
-      -H 'Content-type: application/json' \
-      --data "$payload" \
-      "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 || true
-  fi
+  curl -s -X POST \
+    -H 'Content-type: application/json' \
+    --data "$payload" \
+    "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 || true
 }
 
 # --- メイン処理 ---
@@ -196,11 +209,11 @@ main() {
   local config
   config=$(get_message_config "$EVENT_TYPE")
 
-  IFS='|' read -r title message detail emoji sound <<< "$config"
+  IFS='|' read -r title message detail emoji sound color <<< "$config"
 
   # 並列で通知を送信
   send_local_notification "$title" "$message" "$detail" "$sound" &
-  send_slack_notification "$title" "$message" "$detail" "$emoji" &
+  send_slack_notification "$title" "$message" "$detail" "$emoji" "$color" &
 
   wait
 }
