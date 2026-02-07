@@ -34,30 +34,9 @@ Claude Code の設定画面（`/plugins`）から **notify-on-stop** を選択�
 
 ## セットアップ
 
-### Slack 通知の設定（2つの方法）
+### Slack 通知の設定
 
-`~/.claude/settings.json` に環境変数を追加します。
-
-#### 方法 A: Bot Token を使用（推奨）
-
-```json
-{
-  "env": {
-    "SLACK_BOT_TOKEN": "xoxb-xxxx-xxxx-xxxx",
-    "SLACK_CHANNEL_ID": "C0XXXXXXXXX"
-  }
-}
-```
-
-**Bot Token の取得手順：**
-1. [Slack API](https://api.slack.com/apps) でアプリを作成
-2. **OAuth & Permissions** で `chat:write` スコープを追加
-3. **Install to Workspace** でインストール
-4. **Bot User OAuth Token** (xoxb-...) をコピー
-5. 通知先チャンネルに Bot を招待（`/invite @Bot名`）
-6. チャンネル ID は URL から取得（`slack.com/archives/C0XXXXXXXXX`）
-
-#### 方法 B: Incoming Webhook を使用
+`~/.claude/settings.json` に Incoming Webhook URL を追加します。
 
 ```json
 {
@@ -85,26 +64,10 @@ Claude Code の設定画面（`/plugins`）から **notify-on-stop** を選択�
 
 | 環境変数 | 説明 | デフォルト |
 |---------|------|-----------|
-| `SLACK_BOT_TOKEN` | Slack Bot Token (xoxb-...) | - |
-| `SLACK_CHANNEL_ID` | Bot Token 使用時のチャンネル ID | - |
 | `SLACK_WEBHOOK_URL` | Slack Incoming Webhook URL | - |
 | `NOTIFY_SOUND` | 通知音の名前 | `Glass` |
 | `NOTIFY_SLACK_ENABLED` | Slack 通知の有効/無効 | `true` |
 | `NOTIFY_LOCAL_ENABLED` | ローカル通知の有効/無効 | `true` |
-
-### 設定例（Bot Token）
-
-```json
-{
-  "env": {
-    "SLACK_BOT_TOKEN": "xoxb-xxxx-xxxx-xxxx",
-    "SLACK_CHANNEL_ID": "C0XXXXXXXXX",
-    "NOTIFY_SOUND": "Ping",
-    "NOTIFY_SLACK_ENABLED": "true",
-    "NOTIFY_LOCAL_ENABLED": "true"
-  }
-}
-```
 
 ### 通知音の選択肢
 

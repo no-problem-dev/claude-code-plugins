@@ -5,10 +5,8 @@
 # 使用方法: notify.sh <event_type>
 #   event_type: stop | notification | subagent | permission
 #
-# 環境変数（Slack 通知 - いずれかを設定）:
+# 環境変数（Slack 通知）:
 #   SLACK_WEBHOOK_URL     - Slack Incoming Webhook URL
-#   SLACK_BOT_TOKEN       - Slack Bot Token (xoxb-...)
-#   SLACK_CHANNEL_ID      - Bot Token 使用時のチャンネルID
 #
 # 環境変数（通知設定）:
 #   NOTIFY_SOUND          - 通知音 (デフォルト: Glass)
@@ -185,38 +183,11 @@ send_slack_notification() {
 EOF
 )
 
-  # Bot Token を使用する場合
-  if [[ -n "${SLACK_BOT_TOKEN:-}" && -n "${SLACK_CHANNEL_ID:-}" ]]; then
-    local bot_payload
-    bot_payload=$(cat <<EOF
-{
-  "channel": "${SLACK_CHANNEL_ID}",
-  "blocks": [
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "${text}"
-      }
-    }
-  ]
-}
-EOF
-)
-    curl -s -X POST "https://slack.com/api/chat.postMessage" \
-      -H "Authorization: Bearer ${SLACK_BOT_TOKEN}" \
-      -H "Content-Type: application/json" \
-      -d "$bot_payload" >/dev/null 2>&1 || true
-    return 0
-  fi
-
-  # Incoming Webhook URL を使用する場合
   if [[ -n "${SLACK_WEBHOOK_URL:-}" ]]; then
     curl -s -X POST \
       -H 'Content-type: application/json' \
       --data "$payload" \
       "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 || true
-    return 0
   fi
 }
 
