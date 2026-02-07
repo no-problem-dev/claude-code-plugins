@@ -1,0 +1,65 @@
+---
+name: go-maintenance
+description: Go 依存関係の整理・キャッシュクリア。「go mod tidy」「依存関係」「go mod」「キャッシュクリア」「go clean」などのキーワードで自動適用。
+---
+
+# Go メンテナンス
+
+Go バックエンドの依存関係整理とキャッシュ管理。
+
+## プロジェクト検出
+
+以下の優先順位で Go プロジェクトを検出:
+
+1. 環境変数 `GO_BACKEND_DIR`（go.mod の存在を確認）
+2. カレントディレクトリの `go.mod`
+3. サブディレクトリ（`backend/`, `server/`, `api/`, `go/`）
+4. 再帰検索（深さ2まで）
+
+## 依存関係整理
+
+```bash
+cd <backend_dir>
+
+# 未使用の依存を削除、不足している依存を追加
+go mod tidy
+```
+
+## キャッシュクリア
+
+```bash
+# ビルドキャッシュのクリア
+go clean -cache
+
+# テストキャッシュのクリア
+go clean -testcache
+
+# モジュールキャッシュのクリア（全プロジェクトに影響）
+go clean -modcache
+```
+
+## 使用タイミング
+
+- パッケージの追加・削除後 → `go mod tidy`
+- go.mod / go.sum のコンフリクト解決後 → `go mod tidy`
+- ビルドが不安定な場合 → キャッシュクリア
+- ディスク容量確保 → モジュールキャッシュクリア
+
+## よくあるエラー
+
+### go mod tidy が動作しない
+
+```
+go: modules disabled by GO111MODULE=off
+```
+
+**対処:**
+```bash
+export GO111MODULE=on
+go mod tidy
+```
+
+## 注意事項
+
+- `go clean -modcache` は全プロジェクトのモジュールキャッシュを削除する
+- 実行前にユーザーに確認すること
