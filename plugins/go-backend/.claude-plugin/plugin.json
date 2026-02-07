@@ -17,5 +17,5 @@
     "swagger"
   ],
   "skills": "./skills/",
-  "agents": "./agents/"
+  "agents": ["./agents/go-build-runner.md", "./agents/go-test-runner.md"]
 }
