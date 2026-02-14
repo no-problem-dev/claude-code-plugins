@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "no-problem-plugins",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "Claude Code plugin marketplace - workflow automation, iOS development, and productivity tools",
   "owner": {
     "name": "no-problem",
