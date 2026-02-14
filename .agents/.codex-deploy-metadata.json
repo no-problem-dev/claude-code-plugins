@@ -1,0 +1,39 @@
+{
+  "generator": "deploy-to-codex",
+  "version": "1.0.0",
+  "generated_at": "2026-02-14T13:36:37.748242",
+  "source_marketplace": ".claude-plugin/marketplace.json",
+  "stats": {
+    "plugins_scanned": 8,
+    "skills_portable": 13,
+    "skills_partial": 2,
+    "skills_mcp_only": 1,
+    "skills_delegation_only": 0,
+    "agents_converted": 4,
+    "non_portable_components": 2
+  },
+  "files_generated": [
+    ".agents/AGENTS.md",
+    ".agents/skills/agent--go-build-runner/SKILL.md",
+    ".agents/skills/agent--go-test-runner/SKILL.md",
+    ".agents/skills/agent--ios-build-runner/SKILL.md",
+    ".agents/skills/agent--ios-test-runner/SKILL.md",
+    ".agents/skills/changelog-manage/SKILL.md",
+    ".agents/skills/design-system-workflow/SKILL.md",
+    ".agents/skills/emulator-control/SKILL.md",
+    ".agents/skills/firebase-emulator-workflow/SKILL.md",
+    ".agents/skills/go-backend-workflow/SKILL.md",
+    ".agents/skills/go-dev-server/SKILL.md",
+    ".agents/skills/go-maintenance/SKILL.md",
+    ".agents/skills/go-quality/SKILL.md",
+    ".agents/skills/ios-clean-architecture/SKILL.md",
+    ".agents/skills/ios-dev-workflow/SKILL.md",
+    ".agents/skills/ios-diagnostics/SKILL.md",
+    ".agents/skills/ios-maintenance/SKILL.md",
+    ".agents/skills/ios-preview-repl/SKILL.md",
+    ".agents/skills/ios-project-info/SKILL.md",
+    ".agents/skills/release-prepare/SKILL.md",
+    ".agents/skills/release-workflow/SKILL.md"
+  ],
+  "checksum": "a3657be6ffa514e6aca7cb234b8673da7ea87c506e87c3bcf71b4617d42352ad"
+}

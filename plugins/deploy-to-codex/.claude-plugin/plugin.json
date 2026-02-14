@@ -1,0 +1,11 @@
+{
+  "name": "deploy-to-codex",
+  "version": "1.0.0",
+  "description": "Claude Code プラグインの SKILL.md を Codex CLI 互換形式に変換し .agents/skills/ と AGENTS.md を生成",
+  "author": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "keywords": ["codex", "openai", "deploy", "convert", "migration", "skills", "agents"],
+  "skills": "./skills/"
+}

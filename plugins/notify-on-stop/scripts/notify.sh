@@ -11,6 +11,7 @@
 # 環境変数（通知設定）:
 #   NOTIFY_SLACK_ENABLED  - Slack通知の有効化 (true/false, デフォルト: true)
 #   NOTIFY_LOCAL_ENABLED  - ローカル通知の有効化 (true/false, デフォルト: true)
+#   NOTIFY_SUBAGENT_ENABLED - サブエージェント完了通知 (true/false, デフォルト: false)
 # ============================================================================
 
 set -euo pipefail
@@ -206,6 +207,11 @@ EOF
 
 # --- メイン処理 ---
 main() {
+  # サブエージェント通知はデフォルト無効（環境変数で有効化可能）
+  if [[ "$EVENT_TYPE" == "subagent" && "${NOTIFY_SUBAGENT_ENABLED:-false}" != "true" ]]; then
+    exit 0
+  fi
+
   local config
   config=$(get_message_config "$EVENT_TYPE")
 
