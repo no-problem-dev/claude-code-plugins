@@ -32,6 +32,12 @@ Claude Code プラグインマーケットプレイス
 | [release-flow](./plugins/release-flow/) | リリースワークフロー自動化 |
 | [notify-on-stop](./plugins/notify-on-stop/) | 停止・権限要求時に Slack / macOS 通知を送信 |
 
+### ツーリング
+
+| プラグイン | 説明 |
+|-----------|------|
+| [deploy-to-codex](./plugins/deploy-to-codex/) | Claude Code スキルを Codex CLI 互換 .agents/ に変換 |
+
 ## 開発
 
 このリポジトリでは [plugin-dev@anthropic-official](https://github.com/anthropics/claude-code/tree/main/plugins/plugin-dev) が設定済みです。

@@ -101,16 +101,15 @@ description: スキルの説明（いつ使うか、キーワード含む）
 - コマンドは頻繁に使う操作をショートカット化
 - エージェントは独立したコンテキストで実行される専門タスク向け
 
-## 予定プラグイン
+## プラグイン一覧
 
-### release-flow
-Stockle プロジェクトのリリースフローを参考にした自動化:
-- `/release prepare` - リリース準備
-- `/release changelog` - CHANGELOG 更新
-- セマンティックバージョニングガイダンス
-
-### ios-architecture
-iOS 開発のアーキテクチャスキル:
-- Clean Architecture パターン
-- SwiftUI + Combine ベストプラクティス
-- マルチモジュール Swift Package 構成
+| プラグイン | バージョン | 説明 |
+|-----------|----------|------|
+| release-flow | 2.0.0 | リリースワークフロー自動化（CHANGELOG・バージョン管理） |
+| ios-architecture | 1.0.0 | iOS Clean Architecture スキル |
+| notify-on-stop | 1.0.0 | 停止・権限要求時に Slack / macOS 通知 |
+| ios-dev | 2.0.0 | iOS/Swift/Xcode ビルド・テスト・実行コマンド群 |
+| go-backend | 2.0.0 | Go バックエンド ビルド・テスト・Lint |
+| firebase-emulator | 2.0.0 | Firebase Emulator Suite 管理 |
+| swift-design-system | 1.0.0 | Swift Design System UI 実装スキル |
+| deploy-to-codex | 1.0.0 | Claude Code スキルを Codex CLI 互換に変換 |
