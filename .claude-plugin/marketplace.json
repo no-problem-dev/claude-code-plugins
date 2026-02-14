@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "no-problem-plugins",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "Claude Code plugin marketplace - workflow automation, iOS development, and productivity tools",
   "owner": {
     "name": "no-problem",
@@ -63,6 +63,14 @@
       "source": "./plugins/swift-design-system",
       "category": "development",
       "tags": ["ios", "swift", "swiftui", "design-system", "ui", "theme", "components"]
+    },
+    {
+      "name": "deploy-to-codex",
+      "description": "Claude Code プラグインを Codex CLI 互換に変換 - SKILL.md → .agents/skills/ + AGENTS.md 自動生成",
+      "version": "1.0.0",
+      "source": "./plugins/deploy-to-codex",
+      "category": "tooling",
+      "tags": ["codex", "openai", "deploy", "convert", "migration", "skills", "agents"]
     }
   ]
 }

@@ -7,6 +7,28 @@
 
 ## [未リリース]
 
+## [1.0.8] - 2026-02-14
+
+### 追加
+
+- **deploy-to-codex**: Claude Code → Codex CLI 変換プラグイン (v1.0.0)
+  - `deploy-to-codex` スキル: マーケットプレイスの全プラグインを Codex CLI 互換 `.agents/` に変換
+  - `codex-export` スキル: 任意プロジェクトの `.claude/` ディレクトリを Codex CLI 互換に変換
+  - コンテキストファイル（`.claude/contexts/`）を AGENTS.md に要約統合
+  - 互換性分類: PORTABLE / PARTIAL / MCP_ONLY / DELEGATION_ONLY
+  - Codex CLI の frontmatter パース要件に対応（`---` を1行目に配置）
+- `.agents/` に Codex CLI 互換スキル 22 件 + AGENTS.md を生成
+
+### 変更
+
+- **README**: deploy-to-codex を「ツーリング」カテゴリに追加
+- **CLAUDE.md**: 「予定プラグイン」を全8プラグインの実装済み一覧に更新
+- **swift-design-system**: README.md を追加
+
+### 修正
+
+- **notify-on-stop**: サブエージェント完了通知をデフォルト無効に変更
+
 ## [1.0.7] - 2026-02-07
 
 ### 変更
@@ -135,6 +157,7 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.8]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.8
 [1.0.7]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.7
 [1.0.6]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.6
 [1.0.5]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.5
@@ -157,3 +180,5 @@
 <!-- Auto-generated on 2025-11-30T04:03:48Z by release workflow -->
 
 <!-- Auto-generated on 2026-02-07T05:39:39Z by release workflow -->
+
+<!-- Auto-generated on 2026-02-07T09:28:13Z by release workflow -->
