@@ -26,7 +26,7 @@ struct ContentView: View {
             // メインコンテンツ
             VStack {
                 Button("通知を表示") {
-                    snackbarState.show("操作が完了しました")
+                    snackbarState.show(message: "操作が完了しました")
                 }
             }
 
@@ -43,9 +43,9 @@ struct ContentView: View {
 
 ```swift
 snackbarState.show(
-    "ファイルを削除しました",
-    action: SnackbarAction(title: "元に戻す") {
-        undoDelete()
+    message: "ファイルを削除しました",
+    primaryAction: SnackbarAction(title: "元に戻す") {
+        await undoDelete()
     }
 )
 ```
@@ -56,12 +56,12 @@ snackbarState.show(
 
 ```swift
 snackbarState.show(
-    "変更を保存しますか？",
-    action: SnackbarAction(title: "保存") {
-        save()
+    message: "変更を保存しますか？",
+    primaryAction: SnackbarAction(title: "保存") {
+        await save()
     },
     secondaryAction: SnackbarAction(title: "破棄") {
-        discard()
+        await discard()
     }
 )
 ```
@@ -73,13 +73,13 @@ snackbarState.show(
 ```swift
 // 長めの表示（8秒）
 snackbarState.show(
-    "重要なメッセージ",
+    message: "重要なメッセージ",
     duration: 8.0
 )
 
 // 短い表示（3秒）
 snackbarState.show(
-    "保存しました",
+    message: "保存しました",
     duration: 3.0
 )
 ```
@@ -110,12 +110,12 @@ if snackbarState.isVisible {
 func saveData() async {
     do {
         try await repository.save(data)
-        snackbarState.show("保存しました")
+        snackbarState.show(message: "保存しました")
     } catch {
         snackbarState.show(
-            "保存に失敗しました",
-            action: SnackbarAction(title: "再試行") {
-                Task { await saveData() }
+            message: "保存に失敗しました",
+            primaryAction: SnackbarAction(title: "再試行") {
+                await saveData()
             }
         )
     }
@@ -132,8 +132,8 @@ func deleteItem(_ item: Item) {
     items.removeAll { $0.id == item.id }
 
     snackbarState.show(
-        "\(item.name)を削除しました",
-        action: SnackbarAction(title: "元に戻す") {
+        message: "\(item.name)を削除しました",
+        primaryAction: SnackbarAction(title: "元に戻す") {
             items.append(deletedItem)
         }
     )
@@ -167,7 +167,7 @@ struct ChildView: View {
 
     var body: some View {
         Button("通知") {
-            snackbar.show("メッセージ")
+            snackbar.show(message: "メッセージ")
         }
     }
 }
@@ -181,7 +181,7 @@ struct ChildView: View {
 // ✅ Good: Snackbarコンポーネントを使用
 @State private var snackbarState = SnackbarState()
 
-snackbarState.show("保存しました")
+snackbarState.show(message: "保存しました")
 Snackbar(state: snackbarState)
 
 // ❌ Bad: アラートで代用

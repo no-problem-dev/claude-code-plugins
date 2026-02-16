@@ -1,15 +1,55 @@
 # EmojiPicker コンポーネント
 
-絵文字を選択するピッカー。ViewModifier形式で提供。
+絵文字を選択するピッカー。View Extension 形式で提供。
 
 ---
 
 ## 特徴
 
-- カテゴリ分類（Smileys, Animals, Food, Activities等）
-- 大きな32pt表示
+- カテゴリ分類表示
+- 大きな 32pt 表示
 - 検索・フィルタリング機能
-- ハーフモーダルシート表示
+- ハーフモーダルシート表示（.medium, .large detents）
+- 選択クリア機能
+
+---
+
+## API
+
+```swift
+// View Extension
+func emojiPicker(
+    categories: [any EmojiCategoryProtocol],
+    selectedEmoji: Binding<String?>,
+    isPresented: Binding<Bool>
+) -> some View
+```
+
+### モデル
+
+```swift
+struct EmojiCategory: EmojiCategoryProtocol {
+    let id: String
+    let displayName: String
+    let emojis: [EmojiItem]
+}
+
+struct EmojiItem: Identifiable {
+    let id: String
+    let emoji: String        // 絵文字文字列
+    let displayName: String? // 表示名（検索用）
+}
+```
+
+---
+
+## パラメータ
+
+| パラメータ | 型 | 説明 |
+|-----------|-----|------|
+| `categories` | `[any EmojiCategoryProtocol]` | 絵文字カテゴリの配列 |
+| `selectedEmoji` | `Binding<String?>` | 選択中の絵文字（nil で未選択） |
+| `isPresented` | `Binding<Bool>` | シート表示状態 |
 
 ---
 
@@ -18,125 +58,131 @@
 ```swift
 import DesignSystem
 
-@State private var selectedEmoji = ""
+@State private var selectedEmoji: String? = nil
+@State private var showPicker = false
+
+let categories: [EmojiCategory] = [
+    EmojiCategory(id: "smileys", displayName: "スマイリー", emojis: [
+        EmojiItem(id: "smile", emoji: "😊", displayName: "にっこり"),
+        EmojiItem(id: "laugh", emoji: "😂", displayName: "大笑い"),
+        EmojiItem(id: "heart_eyes", emoji: "😍", displayName: "ハート目"),
+    ]),
+    EmojiCategory(id: "animals", displayName: "動物", emojis: [
+        EmojiItem(id: "dog", emoji: "🐶", displayName: "犬"),
+        EmojiItem(id: "cat", emoji: "🐱", displayName: "猫"),
+    ]),
+]
 
 Button {
-    // ピッカーが表示される
+    showPicker = true
 } label: {
-    if selectedEmoji.isEmpty {
-        Text("絵文字を選択")
-    } else {
-        Text(selectedEmoji)
+    if let emoji = selectedEmoji {
+        Text(emoji)
             .font(.system(size: 32))
+    } else {
+        Text("絵文字を選択")
     }
 }
-.emojiPicker($selectedEmoji)
+.emojiPicker(
+    categories: categories,
+    selectedEmoji: $selectedEmoji,
+    isPresented: $showPicker
+)
 ```
 
 ---
 
-## タグ・カテゴリでの使用
+## 応用パターン
+
+### タグ・カテゴリでの使用
 
 ```swift
-struct Category: Identifiable {
+struct CategoryItem: Identifiable {
     let id = UUID()
-    var emoji: String
+    var emoji: String?
     var name: String
 }
 
-@State private var category = Category(emoji: "📁", name: "一般")
-
 @Environment(\.spacingScale) var spacing
+
+@State private var category = CategoryItem(emoji: "📁", name: "一般")
+@State private var showEmojiPicker = false
 
 HStack(spacing: spacing.md) {
     // 絵文字表示（タップで変更）
     Button {
-        // ピッカー表示
+        showEmojiPicker = true
     } label: {
-        Text(category.emoji)
+        Text(category.emoji ?? "❓")
             .font(.title)
     }
-    .emojiPicker($category.emoji)
+    .emojiPicker(
+        categories: categories,
+        selectedEmoji: $category.emoji,
+        isPresented: $showEmojiPicker
+    )
 
     // カテゴリ名入力
     TextField("カテゴリ名", text: $category.name)
 }
 ```
 
----
-
-## リスト項目での使用
-
-```swift
-struct Folder: Identifiable {
-    let id = UUID()
-    var emoji: String
-    var name: String
-}
-
-@State private var folders: [Folder] = [
-    Folder(emoji: "📁", name: "ドキュメント"),
-    Folder(emoji: "📷", name: "写真"),
-    Folder(emoji: "🎵", name: "音楽")
-]
-
-List {
-    ForEach($folders) { $folder in
-        HStack {
-            Text(folder.emoji)
-                .font(.title2)
-                .emojiPicker($folder.emoji)
-
-            TextField("フォルダ名", text: $folder.name)
-        }
-    }
-}
-```
-
----
-
-## プレビュー付き選択
+### プレビュー付き選択
 
 ```swift
 @Environment(\.colorPalette) var colors
 @Environment(\.spacingScale) var spacing
 
-@State private var emoji = "⭐️"
+@State private var selectedEmoji: String? = "⭐️"
+@State private var showPicker = false
 
 VStack(spacing: spacing.lg) {
     // 大きなプレビュー
-    Text(emoji)
+    Text(selectedEmoji ?? "?")
         .font(.system(size: 80))
 
     // 選択ボタン
-    Button("絵文字を変更") { }
-        .buttonStyle(.secondary)
-        .emojiPicker($emoji)
+    Button("絵文字を変更") {
+        showPicker = true
+    }
+    .buttonStyle(.secondary)
+    .emojiPicker(
+        categories: categories,
+        selectedEmoji: $selectedEmoji,
+        isPresented: $showPicker
+    )
 }
 ```
 
----
-
-## カード作成フォーム
+### カード作成フォーム
 
 ```swift
-@State private var cardEmoji = "📝"
+@Environment(\.colorPalette) var colors
+@Environment(\.spacingScale) var spacing
+@Environment(\.radiusScale) var radius
+
+@State private var cardEmoji: String? = "📝"
 @State private var cardTitle = ""
 @State private var cardDescription = ""
+@State private var showPicker = false
 
 Card(elevation: .level2) {
     VStack(spacing: spacing.lg) {
         // 絵文字選択
         Button {
-            // ピッカー表示
+            showPicker = true
         } label: {
-            Text(cardEmoji)
+            Text(cardEmoji ?? "➕")
                 .font(.system(size: 48))
                 .frame(width: 80, height: 80)
                 .background(colors.surfaceVariant)
                 .clipShape(RoundedRectangle(cornerRadius: radius.lg))
         }
-        .emojiPicker($cardEmoji)
+        .emojiPicker(
+            categories: categories,
+            selectedEmoji: $cardEmoji,
+            isPresented: $showPicker
+        )
 
         // タイトル
         TextField("タイトル", text: $cardTitle)
@@ -150,29 +196,32 @@ Card(elevation: .level2) {
 }
 ```
 
----
-
-## 初期値なしの場合
+### 初期値なしの場合
 
 ```swift
-@State private var emoji: String = ""
+@State private var emoji: String? = nil
+@State private var showPicker = false
 
 Button {
-    // ピッカー表示
+    showPicker = true
 } label: {
-    if emoji.isEmpty {
+    if let emoji {
+        Text(emoji)
+            .font(.title)
+    } else {
         Image(systemName: "face.smiling")
             .font(.title)
             .foregroundColor(colors.onSurfaceVariant)
             .frame(width: 44, height: 44)
             .background(colors.surfaceVariant)
             .clipShape(Circle())
-    } else {
-        Text(emoji)
-            .font(.title)
     }
 }
-.emojiPicker($emoji)
+.emojiPicker(
+    categories: categories,
+    selectedEmoji: $emoji,
+    isPresented: $showPicker
+)
 ```
 
 ---
@@ -180,12 +229,28 @@ Button {
 ## Good / Bad パターン
 
 ```swift
-// ✅ Good: emojiPickerモディファイアを使用
-Text(selectedEmoji)
-    .emojiPicker($selectedEmoji)
+// ✅ Good: emojiPicker View Extension を使用し、isPresented で制御
+@State private var selectedEmoji: String? = nil
+@State private var showPicker = false
+
+Button("選択") { showPicker = true }
+    .emojiPicker(
+        categories: categories,
+        selectedEmoji: $selectedEmoji,
+        isPresented: $showPicker
+    )
+
+// ✅ Good: selectedEmoji は String?（Optional）を使用
+@State private var selectedEmoji: String? = nil
 
 // ❌ Bad: 独自のピッカー実装
 .sheet(isPresented: $showPicker) {
     // 手動で絵文字リストを実装
 }
+
+// ❌ Bad: 非 Optional の String を使用
+@State private var selectedEmoji: String = ""
+
+// ❌ Bad: isPresented を省略して直接バインディングだけ渡す
+.emojiPicker($selectedEmoji)
 ```

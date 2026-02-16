@@ -269,6 +269,7 @@ withAnimation(motion.slide) { ... }
 ### アクセス方法
 
 ```swift
+// デフォルトは .level1。強調する場合は .level2 を指定
 Card(elevation: .level2) { content }
 // または
 view.elevation(.level2)

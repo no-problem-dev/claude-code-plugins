@@ -1,15 +1,55 @@
 # IconPicker コンポーネント
 
-SF Symbolsからアイコンを選択するピッカー。ViewModifier形式で提供。
+SF Symbols からアイコンを選択するピッカー。View Extension 形式で提供。
 
 ---
 
 ## 特徴
 
-- SF Symbolsのカテゴリ分類
+- SF Symbols のカテゴリ分類表示
 - 検索・フィルタリング機能
 - ハーフモーダルシート表示（.medium, .large detents）
 - 選択時の視覚的フィードバック
+- 選択クリア機能
+
+---
+
+## API
+
+```swift
+// View Extension
+func iconPicker(
+    categories: [any IconCategoryProtocol],
+    selectedIcon: Binding<String?>,
+    isPresented: Binding<Bool>
+) -> some View
+```
+
+### モデル
+
+```swift
+struct IconCategory: IconCategoryProtocol {
+    let id: String
+    let displayName: String
+    let icons: [IconItem]
+}
+
+struct IconItem: Identifiable {
+    let id: String
+    let systemName: String   // SF Symbols 名
+    let displayName: String? // 表示名（検索用）
+}
+```
+
+---
+
+## パラメータ
+
+| パラメータ | 型 | 説明 |
+|-----------|-----|------|
+| `categories` | `[any IconCategoryProtocol]` | アイコンカテゴリの配列 |
+| `selectedIcon` | `Binding<String?>` | 選択中のアイコン名（nil で未選択） |
+| `isPresented` | `Binding<Bool>` | シート表示状態 |
 
 ---
 
@@ -18,136 +58,148 @@ SF Symbolsからアイコンを選択するピッカー。ViewModifier形式で�
 ```swift
 import DesignSystem
 
-@State private var selectedIcon = ""
+@State private var selectedIcon: String? = nil
+@State private var showPicker = false
+
+let categories: [IconCategory] = [
+    IconCategory(id: "general", displayName: "一般", icons: [
+        IconItem(id: "star", systemName: "star.fill", displayName: "スター"),
+        IconItem(id: "heart", systemName: "heart.fill", displayName: "ハート"),
+        IconItem(id: "folder", systemName: "folder.fill", displayName: "フォルダ"),
+    ]),
+    IconCategory(id: "media", displayName: "メディア", icons: [
+        IconItem(id: "photo", systemName: "photo", displayName: "写真"),
+        IconItem(id: "camera", systemName: "camera.fill", displayName: "カメラ"),
+    ]),
+]
 
 Button {
-    // ピッカーが表示される
+    showPicker = true
 } label: {
-    HStack {
-        if selectedIcon.isEmpty {
-            Text("アイコンを選択")
-        } else {
-            Image(systemName: selectedIcon)
-            Text(selectedIcon)
-        }
+    if let icon = selectedIcon {
+        Image(systemName: icon)
+        Text(icon)
+    } else {
+        Text("アイコンを選択")
     }
 }
-.iconPicker($selectedIcon)
+.iconPicker(
+    categories: categories,
+    selectedIcon: $selectedIcon,
+    isPresented: $showPicker
+)
 ```
 
 ---
 
-## プレビュー付き選択
+## 応用パターン
+
+### プレビュー付き選択
 
 ```swift
 @Environment(\.colorPalette) var colors
 @Environment(\.spacingScale) var spacing
 
-@State private var icon = "star.fill"
+@State private var selectedIcon: String? = "star.fill"
+@State private var showPicker = false
 
 VStack(spacing: spacing.lg) {
     // プレビュー
-    Image(systemName: icon)
-        .font(.system(size: 60))
-        .foregroundColor(colors.primary)
+    if let icon = selectedIcon {
+        Image(systemName: icon)
+            .font(.system(size: 60))
+            .foregroundColor(colors.primary)
+    } else {
+        Image(systemName: "questionmark.circle")
+            .font(.system(size: 60))
+            .foregroundColor(colors.onSurfaceVariant)
+    }
 
     // 選択ボタン
-    Button("アイコンを変更") { }
-        .buttonStyle(.secondary)
-        .iconPicker($icon)
+    Button("アイコンを変更") {
+        showPicker = true
+    }
+    .buttonStyle(.secondary)
+    .iconPicker(
+        categories: categories,
+        selectedIcon: $selectedIcon,
+        isPresented: $showPicker
+    )
 }
 ```
 
----
-
-## カテゴリ編集での使用
+### カテゴリ編集での使用
 
 ```swift
-struct Category: Identifiable {
+struct CategoryItem: Identifiable {
     let id = UUID()
-    var icon: String
+    var icon: String?
     var name: String
 }
 
-@State private var category = Category(icon: "folder.fill", name: "一般")
+@State private var category = CategoryItem(icon: "folder.fill", name: "一般")
+@State private var showIconPicker = false
 
 HStack(spacing: spacing.md) {
     // アイコン表示（タップで変更）
     Button {
-        // ピッカー表示
+        showIconPicker = true
     } label: {
-        Image(systemName: category.icon)
+        Image(systemName: category.icon ?? "questionmark")
             .font(.title)
             .foregroundColor(colors.primary)
             .frame(width: 44, height: 44)
             .background(colors.primaryContainer)
             .clipShape(RoundedRectangle(cornerRadius: radius.md))
     }
-    .iconPicker($category.icon)
+    .iconPicker(
+        categories: categories,
+        selectedIcon: $category.icon,
+        isPresented: $showIconPicker
+    )
 
     // カテゴリ名
     TextField("カテゴリ名", text: $category.name)
 }
 ```
 
----
-
-## リスト項目での使用
+### 選択クリア対応
 
 ```swift
-struct ListItem: Identifiable {
-    let id = UUID()
-    var icon: String
-    var title: String
-}
-
-@State private var items: [ListItem] = [
-    ListItem(icon: "house", title: "ホーム"),
-    ListItem(icon: "gear", title: "設定")
-]
-
-List {
-    ForEach($items) { $item in
-        HStack {
-            Image(systemName: item.icon)
-                .foregroundColor(colors.primary)
-                .iconPicker($item.icon)
-
-            TextField("タイトル", text: $item.title)
-        }
-    }
-}
-```
-
----
-
-## 初期値なしの場合
-
-```swift
-@State private var icon: String = ""
+@State private var selectedIcon: String? = "star.fill"
+@State private var showPicker = false
 
 VStack {
-    if icon.isEmpty {
-        // プレースホルダー
-        Circle()
-            .fill(colors.surfaceVariant)
-            .frame(width: 60, height: 60)
-            .overlay(
-                Image(systemName: "plus")
-                    .foregroundColor(colors.onSurfaceVariant)
-            )
-            .iconPicker($icon)
-    } else {
-        // 選択済み
-        Image(systemName: icon)
-            .font(.system(size: 40))
-            .foregroundColor(colors.primary)
-            .iconPicker($icon)
+    Button {
+        showPicker = true
+    } label: {
+        if let icon = selectedIcon {
+            Image(systemName: icon)
+                .font(.title)
+                .foregroundColor(colors.primary)
+        } else {
+            Circle()
+                .fill(colors.surfaceVariant)
+                .frame(width: 60, height: 60)
+                .overlay(
+                    Image(systemName: "plus")
+                        .foregroundColor(colors.onSurfaceVariant)
+                )
+        }
     }
+    .iconPicker(
+        categories: categories,
+        selectedIcon: $selectedIcon,
+        isPresented: $showPicker
+    )
 
-    Text(icon.isEmpty ? "アイコンを選択" : icon)
-        .typography(.bodySmall)
-        .foregroundColor(colors.onSurfaceVariant)
+    // 選択をクリアするボタン
+    if selectedIcon != nil {
+        Button("クリア") {
+            selectedIcon = nil
+        }
+        .typography(.labelSmall)
+    }
 }
 ```
 
@@ -156,12 +208,28 @@ VStack {
 ## Good / Bad パターン
 
 ```swift
-// ✅ Good: iconPickerモディファイアを使用
-Button("選択") { }
-    .iconPicker($selectedIcon)
+// ✅ Good: iconPicker View Extension を使用し、isPresented で制御
+@State private var selectedIcon: String? = nil
+@State private var showPicker = false
+
+Button("選択") { showPicker = true }
+    .iconPicker(
+        categories: categories,
+        selectedIcon: $selectedIcon,
+        isPresented: $showPicker
+    )
+
+// ✅ Good: selectedIcon は String?（Optional）を使用
+@State private var selectedIcon: String? = nil
 
 // ❌ Bad: 独自のピッカー実装
 .sheet(isPresented: $showPicker) {
-    // 手動でSF Symbolsリストを実装
+    // 手動で SF Symbols リストを実装
 }
+
+// ❌ Bad: 非 Optional の String を使用
+@State private var selectedIcon: String = ""
+
+// ❌ Bad: isPresented を省略して直接バインディングだけ渡す
+.iconPicker($selectedIcon)
 ```
