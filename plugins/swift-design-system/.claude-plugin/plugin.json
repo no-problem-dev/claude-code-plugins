@@ -1,11 +1,11 @@
 {
   "name": "swift-design-system",
-  "version": "1.0.0",
-  "description": "Swift Design Systemを使用したiOS UI実装のためのスキル。デザイントークン、UIコンポーネント、レイアウトパターンのベストプラクティスを提供。",
+  "version": "2.0.0",
+  "description": "Swift Design Systemを使用したiOS UI実装のためのスキル。デザイントークン、UIコンポーネント、レイアウトパターンのベストプラクティスに加え、コンポーネント生成、デザイン監査、視覚的差分検出を提供。",
   "author": {
     "name": "no-problem",
     "email": "info@no-problem-net.com"
   },
-  "keywords": ["ios", "swiftui", "design-system", "ui", "theme", "tokens", "components"],
+  "keywords": ["ios", "swiftui", "design-system", "ui", "theme", "tokens", "components", "audit", "diff"],
   "skills": "./skills/"
 }

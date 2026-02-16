@@ -181,7 +181,36 @@ RoundedRectangle(cornerRadius: 8)
 
 ---
 
+## Visual Feedback Loop
+
+UIの視覚的検証には Swift Snapshot Testing を使用する。
+
+### ワークフロー
+
+1. SwiftUI View を作成/修正
+2. スナップショットテストを実行（`xcodebuild test`）
+3. 生成されたスナップショット画像を確認
+4. 問題があればコードを修正して繰り返し
+
+詳細は → **references/VISUAL_LOOP.md**
+
+### 参照ドキュメント
+
+| ドキュメント | 内容 |
+|-------------|------|
+| **references/AESTHETIC.md** | 美的方向性ガイド（AIスロップ回避、Apple HIG） |
+| **references/PREVIEW_PATTERNS.md** | SwiftUI Preview ベストプラクティス |
+| **references/VISUAL_LOOP.md** | Visual Feedback Loop 実践ガイド |
+| **references/DESIGN_SYSTEM_CONTEXT.md** | デザインシステム全体リファレンス |
+| **references/CLAUDE_MD_TEMPLATE.md** | CLAUDE.md デザインセクションテンプレート |
+| **references/VIEW_VERIFICATION_TESTS.md** | スナップショットテスト テンプレート |
+
+---
+
 ## 関連スキル
 
 - **ios-clean-architecture**: アーキテクチャ設計（View層で本スキルを活用）
 - **ios-build-workflow**: ビルド・テスト実行
+- **component-gen**: デザインシステム準拠のコンポーネント生成
+- **design-audit**: 既存UIのデザインシステム準拠性監査
+- **design-diff**: UIの視覚的差分検出・比較
