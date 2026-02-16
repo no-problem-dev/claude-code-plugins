@@ -7,6 +7,25 @@
 
 ## [未リリース]
 
+## [1.0.9] - 2026-02-16
+
+### 追加
+
+- **swift-design-system**: v2.1.0 — AI-native デザインワークフロー統合 + ドキュメント全面修正
+  - `component-gen` スキル: デザインシステム準拠のコンポーネント自動生成
+  - `design-audit` スキル: 既存UIのデザインシステム準拠性監査
+  - `design-diff` スキル: UIの視覚的差分検出・比較
+  - リファレンス追加: AESTHETIC.md, DESIGN_SYSTEM_CONTEXT.md, VISUAL_LOOP.md, PREVIEW_PATTERNS.md, VIEW_VERIFICATION_TESTS.md, CLAUDE_MD_TEMPLATE.md
+  - 新規コンポーネントドキュメント 6件: IconButton, TextField, ProgressBar, StatDisplay, IconBadge, VideoPlayer
+
+### 修正
+
+- **swift-design-system**: ソースコード監査に基づくドキュメント修正
+  - Picker 4種の API シグネチャを正しい形式に全面書き換え（CRITICAL）
+  - Snackbar: `show()` パラメータ名、`primaryAction` 名、async closure 型を修正
+  - Card/SectionCard: デフォルト elevation を `.level1` に修正
+  - ThemeProvider: プロパティ名 `mode` → `themeMode` に修正
+
 ## [1.0.8] - 2026-02-14
 
 ### 追加
@@ -157,6 +176,7 @@
   - レイヤー依存関係ガイド
 - マーケットプレイス設定（plugin-dev@anthropic-official 参照）
 
+[1.0.9]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.9
 [1.0.8]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.8
 [1.0.7]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.7
 [1.0.6]: https://github.com/no-problem-dev/claude-code-plugins/releases/tag/v1.0.6
@@ -182,3 +202,5 @@
 <!-- Auto-generated on 2026-02-07T05:39:39Z by release workflow -->
 
 <!-- Auto-generated on 2026-02-07T09:28:13Z by release workflow -->
+
+<!-- Auto-generated on 2026-02-14T05:27:12Z by release workflow -->

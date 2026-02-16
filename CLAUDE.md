@@ -111,5 +111,5 @@ description: スキルの説明（いつ使うか、キーワード含む）
 | ios-dev | 2.0.0 | iOS/Swift/Xcode ビルド・テスト・実行コマンド群 |
 | go-backend | 2.0.0 | Go バックエンド ビルド・テスト・Lint |
 | firebase-emulator | 2.0.0 | Firebase Emulator Suite 管理 |
-| swift-design-system | 1.0.0 | Swift Design System UI 実装スキル |
+| swift-design-system | 2.1.0 | Swift Design System UI 実装スキル |
 | deploy-to-codex | 1.0.0 | Claude Code スキルを Codex CLI 互換に変換 |

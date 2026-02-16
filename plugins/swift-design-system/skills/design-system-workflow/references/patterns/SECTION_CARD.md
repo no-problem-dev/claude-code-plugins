@@ -17,7 +17,7 @@
 | パラメータ | 型 | デフォルト | 説明 |
 |-----------|---|----------|------|
 | `title` | `String` | - | セクションタイトル |
-| `elevation` | `Elevation` | `.level2` | カードのエレベーション |
+| `elevation` | `Elevation` | `.level1` | カードのエレベーション |
 | `content` | `@ViewBuilder` | - | カード内コンテンツ |
 
 ---
@@ -29,7 +29,7 @@ import DesignSystem
 
 @Environment(\.spacingScale) var spacing
 
-SectionCard(title: "基本設定", elevation: .level2) {
+SectionCard(title: "基本設定") {
     VStack(spacing: spacing.md) {
         Toggle("通知", isOn: $notificationEnabled)
         Toggle("ダークモード", isOn: $darkModeEnabled)

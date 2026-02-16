@@ -58,11 +58,11 @@
     },
     {
       "name": "swift-design-system",
-      "description": "Swift Design System を使用した iOS UI 実装スキル - デザイントークン、コンポーネント、レイアウトパターン",
-      "version": "1.0.0",
+      "description": "Swift Design System を使用した iOS UI 実装スキル - デザイントークン、コンポーネント、レイアウトパターン、コンポーネント生成、デザイン監査、視覚的差分検出",
+      "version": "2.1.0",
       "source": "./plugins/swift-design-system",
       "category": "development",
-      "tags": ["ios", "swift", "swiftui", "design-system", "ui", "theme", "components"]
+      "tags": ["ios", "swift", "swiftui", "design-system", "ui", "theme", "components", "audit", "diff"]
     },
     {
       "name": "deploy-to-codex",

@@ -48,7 +48,7 @@ themeProvider.switchToTheme(id: "ocean")
 themeProvider.toggleMode()
 
 // モード直接指定
-themeProvider.mode = .light   // .light / .dark / .system
+themeProvider.themeMode = .light   // .light / .dark / .system
 ```
 
 ---
@@ -89,7 +89,7 @@ struct ThemeSettingsView: View {
             }
 
             Section("外観モード") {
-                Picker("モード", selection: $themeProvider.mode) {
+                Picker("モード", selection: $themeProvider.themeMode) {
                     Text("システム").tag(ThemeMode.system)
                     Text("ライト").tag(ThemeMode.light)
                     Text("ダーク").tag(ThemeMode.dark)

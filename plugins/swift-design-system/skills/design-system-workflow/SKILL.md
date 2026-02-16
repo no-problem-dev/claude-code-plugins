@@ -1,6 +1,6 @@
 ---
 name: design-system-workflow
-description: Swift Design Systemを使用したiOS UI実装スキル。デザイントークン（カラー、タイポグラフィ、スペーシング、角丸、モーション、エレベーション）、UIコンポーネント（Button、Card、Chip、FAB、Snackbar、Picker）、レイアウトパターン（AspectGrid、SectionCard）のベストプラクティスを提供。「デザイン」「UI」「テーマ」「カラー」「色」「タイポグラフィ」「フォント」「スペーシング」「余白」「角丸」「アニメーション」「ボタン」「カード」「チップ」「グリッド」「レイアウト」「FAB」「Snackbar」「Picker」「SwiftUI」「DesignSystem」などのキーワードで自動適用。
+description: Swift Design Systemを使用したiOS UI実装スキル。デザイントークン、UIコンポーネント（Button、Card、Chip、FAB、Snackbar、Picker等15種）、レイアウトパターンのベストプラクティスを提供。「デザイン」「UI」「テーマ」「カラー」「タイポグラフィ」「スペーシング」「ボタン」「カード」「FAB」「Snackbar」「Picker」「SwiftUI」「DesignSystem」などで自動適用。
 ---
 
 # Swift Design System スキル
@@ -168,6 +168,12 @@ RoundedRectangle(cornerRadius: 8)
 | **EmojiPicker** | 絵文字選択 | → references/components/EMOJI_PICKER.md |
 | **ColorPicker** | カラー選択 | → references/components/COLOR_PICKER.md |
 | **ImagePicker** | 画像選択 | → references/components/IMAGE_PICKER.md |
+| **IconButton** | アイコンボタン | → references/components/ICON_BUTTON.md |
+| **TextField** | テキスト入力 | → references/components/TEXT_FIELD.md |
+| **ProgressBar** | プログレスバー | → references/components/PROGRESS_BAR.md |
+| **StatDisplay** | 数値表示 | → references/components/STAT_DISPLAY.md |
+| **IconBadge** | アイコンバッジ | → references/components/ICON_BADGE.md |
+| **VideoPlayer** | 動画再生 | → references/components/VIDEO_PLAYER.md |
 
 ---
 
@@ -181,7 +187,36 @@ RoundedRectangle(cornerRadius: 8)
 
 ---
 
+## Visual Feedback Loop
+
+UIの視覚的検証には Swift Snapshot Testing を使用する。
+
+### ワークフロー
+
+1. SwiftUI View を作成/修正
+2. スナップショットテストを実行（`xcodebuild test`）
+3. 生成されたスナップショット画像を確認
+4. 問題があればコードを修正して繰り返し
+
+詳細は → **references/VISUAL_LOOP.md**
+
+### 参照ドキュメント
+
+| ドキュメント | 内容 |
+|-------------|------|
+| **references/AESTHETIC.md** | 美的方向性ガイド（AIスロップ回避、Apple HIG） |
+| **references/PREVIEW_PATTERNS.md** | SwiftUI Preview ベストプラクティス |
+| **references/VISUAL_LOOP.md** | Visual Feedback Loop 実践ガイド |
+| **references/DESIGN_SYSTEM_CONTEXT.md** | デザインシステム全体リファレンス |
+| **references/CLAUDE_MD_TEMPLATE.md** | CLAUDE.md デザインセクションテンプレート |
+| **references/VIEW_VERIFICATION_TESTS.md** | スナップショットテスト テンプレート |
+
+---
+
 ## 関連スキル
 
 - **ios-clean-architecture**: アーキテクチャ設計（View層で本スキルを活用）
 - **ios-build-workflow**: ビルド・テスト実行
+- **component-gen**: デザインシステム準拠のコンポーネント生成
+- **design-audit**: 既存UIのデザインシステム準拠性監査
+- **design-diff**: UIの視覚的差分検出・比較

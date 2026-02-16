@@ -1,16 +1,49 @@
 # ImagePicker コンポーネント
 
-カメラまたはフォトライブラリから画像を選択。ViewModifier形式で提供。
+カメラまたはフォトライブラリから画像を選択するピッカー。View Extension 形式で提供（iOS 専用: `#if canImport(UIKit)`）。
 
 ---
 
 ## 特徴
 
-- カメラとフォトライブラリの統合
-- 包括的な権限処理（`.addOnly`）
-- デバイス機能チェック（iPadカメラ対応）
-- 画像圧縮（再帰的な品質調整）
-- JPEG形式出力
+- カメラとフォトライブラリの統合（confirmationDialog 自動表示）
+- 包括的な権限処理（カメラ / フォトライブラリ）を内部で自動処理
+- JPEG 形式の `Data?` として返却
+- `ByteSize` による最大サイズ指定（再帰的に圧縮品質を下げる）
+- iPadでのカメラ有無チェック
+
+---
+
+## API
+
+```swift
+// View Extension（iOS 専用）
+func imagePicker(
+    isPresented: Binding<Bool>,
+    selectedImageData: Binding<Data?>,  // JPEG Data
+    maxSize: ByteSize? = nil,           // 例: 1.mb, 500.kb
+    onCompressionError: ((Error) -> Void)? = nil
+) -> some View
+```
+
+---
+
+## パラメータ
+
+| パラメータ | 型 | デフォルト | 説明 |
+|-----------|-----|-----------|------|
+| `isPresented` | `Binding<Bool>` | - | シート表示状態 |
+| `selectedImageData` | `Binding<Data?>` | - | 選択画像の JPEG バイナリ |
+| `maxSize` | `ByteSize?` | `nil` | 最大ファイルサイズ（例: `1.mb`, `500.kb`） |
+| `onCompressionError` | `((Error) -> Void)?` | `nil` | 圧縮エラー時のコールバック |
+
+### 重要
+
+- **返却型は `Data?`（JPEG バイナリ）であって `UIImage?` ではない**
+- 表示に使う場合は `UIImage(data:)` で変換する
+- Info.plist に以下のキーが必要:
+  - `NSCameraUsageDescription`
+  - `NSPhotoLibraryUsageDescription`
 
 ---
 
@@ -19,13 +52,14 @@
 ```swift
 import DesignSystem
 
-@State private var selectedImage: UIImage?
+@State private var imageData: Data? = nil
+@State private var showPicker = false
 
 Button {
-    // ピッカーが表示される
+    showPicker = true
 } label: {
-    if let image = selectedImage {
-        Image(uiImage: image)
+    if let data = imageData, let uiImage = UIImage(data: data) {
+        Image(uiImage: uiImage)
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(width: 100, height: 100)
@@ -41,25 +75,31 @@ Button {
             )
     }
 }
-.imagePicker($selectedImage)
+.imagePicker(
+    isPresented: $showPicker,
+    selectedImageData: $imageData
+)
 ```
 
 ---
 
-## プロフィール画像編集
+## 応用パターン
+
+### サイズ制限付きプロフィール画像
 
 ```swift
 @Environment(\.colorPalette) var colors
 @Environment(\.spacingScale) var spacing
 @Environment(\.radiusScale) var radius
 
-@State private var profileImage: UIImage?
+@State private var profileImageData: Data? = nil
+@State private var showPicker = false
 
 VStack(spacing: spacing.lg) {
     // アバター表示
     ZStack(alignment: .bottomTrailing) {
-        if let image = profileImage {
-            Image(uiImage: image)
+        if let data = profileImageData, let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
         } else {
@@ -76,25 +116,30 @@ VStack(spacing: spacing.lg) {
             .stroke(colors.outline, lineWidth: 2)
     )
 
-    // 編集ボタン
-    Button("写真を変更") { }
-        .buttonStyle(.secondary)
-        .imagePicker($profileImage)
+    // 編集ボタン（1MB 上限）
+    Button("写真を変更") {
+        showPicker = true
+    }
+    .buttonStyle(.secondary)
+    .imagePicker(
+        isPresented: $showPicker,
+        selectedImageData: $profileImageData,
+        maxSize: 1.mb
+    )
 }
 ```
 
----
-
-## カメラボタン付きアバター
+### カメラボタン付きアバター
 
 ```swift
-@State private var avatar: UIImage?
+@State private var avatarData: Data? = nil
+@State private var showPicker = false
 
 ZStack(alignment: .bottomTrailing) {
     // アバター
     Group {
-        if let image = avatar {
-            Image(uiImage: image)
+        if let data = avatarData, let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
         } else {
@@ -108,7 +153,9 @@ ZStack(alignment: .bottomTrailing) {
     .clipShape(Circle())
 
     // カメラボタン
-    Button { } label: {
+    Button {
+        showPicker = true
+    } label: {
         Image(systemName: "camera.fill")
             .font(.caption)
             .foregroundColor(colors.onPrimary)
@@ -116,22 +163,52 @@ ZStack(alignment: .bottomTrailing) {
             .background(colors.primary)
             .clipShape(Circle())
     }
-    .imagePicker($avatar)
+    .imagePicker(
+        isPresented: $showPicker,
+        selectedImageData: $avatarData,
+        maxSize: 500.kb
+    )
 }
 ```
 
----
-
-## カバー画像選択
+### 圧縮エラーハンドリング付き
 
 ```swift
-@State private var coverImage: UIImage?
+@State private var imageData: Data? = nil
+@State private var showPicker = false
+@State private var showError = false
+@State private var errorMessage = ""
+
+Button("画像を選択") {
+    showPicker = true
+}
+.imagePicker(
+    isPresented: $showPicker,
+    selectedImageData: $imageData,
+    maxSize: 500.kb,
+    onCompressionError: { error in
+        errorMessage = error.localizedDescription
+        showError = true
+    }
+)
+.alert("圧縮エラー", isPresented: $showError) {
+    Button("OK") { }
+} message: {
+    Text(errorMessage)
+}
+```
+
+### カバー画像選択
+
+```swift
+@State private var coverImageData: Data? = nil
+@State private var showPicker = false
 
 VStack(spacing: 0) {
     // カバー画像エリア
     ZStack {
-        if let image = coverImage {
-            Image(uiImage: image)
+        if let data = coverImageData, let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
         } else {
@@ -143,7 +220,7 @@ VStack(spacing: 0) {
     .clipped()
     .overlay(
         Button {
-            // ピッカー表示
+            showPicker = true
         } label: {
             Label("カバーを変更", systemImage: "photo")
                 .typography(.labelMedium)
@@ -153,25 +230,28 @@ VStack(spacing: 0) {
                 .background(.ultraThinMaterial)
                 .clipShape(Capsule())
         }
-        .imagePicker($coverImage)
+        .imagePicker(
+            isPresented: $showPicker,
+            selectedImageData: $coverImageData
+        )
         , alignment: .bottomTrailing
     )
     .padding(spacing.md)
-
-    // 他のコンテンツ
-    // ...
 }
 ```
 
----
-
-## フォーム内での使用
+### フォーム内での使用
 
 ```swift
 struct ProductForm: View {
-    @State private var productImage: UIImage?
+    @Environment(\.colorPalette) var colors
+    @Environment(\.spacingScale) var spacing
+    @Environment(\.radiusScale) var radius
+
+    @State private var productImageData: Data? = nil
     @State private var productName = ""
     @State private var productDescription = ""
+    @State private var showPicker = false
 
     var body: some View {
         Form {
@@ -179,9 +259,12 @@ struct ProductForm: View {
                 HStack {
                     Spacer()
 
-                    Button { } label: {
-                        if let image = productImage {
-                            Image(uiImage: image)
+                    Button {
+                        showPicker = true
+                    } label: {
+                        if let data = productImageData,
+                           let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 150, height: 150)
@@ -199,7 +282,11 @@ struct ProductForm: View {
                             .clipShape(RoundedRectangle(cornerRadius: radius.md))
                         }
                     }
-                    .imagePicker($productImage)
+                    .imagePicker(
+                        isPresented: $showPicker,
+                        selectedImageData: $productImageData,
+                        maxSize: 1.mb
+                    )
 
                     Spacer()
                 }
@@ -218,23 +305,55 @@ struct ProductForm: View {
 
 ## 権限処理について
 
-ImagePickerは内部で以下を自動処理します：
+ImagePicker は内部で以下を自動処理します:
 - カメラ権限のリクエストと状態確認
-- フォトライブラリ権限（`.addOnly`）のリクエスト
-- iPadでのカメラ有無チェック
+- フォトライブラリ権限のリクエスト
+- iPad でのカメラ有無チェック
 - 権限拒否時の適切なフィードバック
+- カメラ / フォトライブラリの選択 confirmationDialog
+
+Info.plist に以下の必須キーを追加してください:
+- `NSCameraUsageDescription` - カメラ使用理由
+- `NSPhotoLibraryUsageDescription` - フォトライブラリ使用理由
 
 ---
 
 ## Good / Bad パターン
 
 ```swift
-// ✅ Good: imagePickerモディファイアを使用
-Button("画像を選択") { }
-    .imagePicker($selectedImage)
+// ✅ Good: imagePicker View Extension を使用し、isPresented で制御
+@State private var imageData: Data? = nil
+@State private var showPicker = false
 
-// ❌ Bad: PHPickerを直接使用（権限処理なし）
+Button("画像を選択") { showPicker = true }
+    .imagePicker(
+        isPresented: $showPicker,
+        selectedImageData: $imageData
+    )
+
+// ✅ Good: selectedImageData は Data?（JPEG バイナリ）を使用
+@State private var imageData: Data? = nil
+
+// ✅ Good: UIImage(data:) で表示用に変換
+if let data = imageData, let uiImage = UIImage(data: data) {
+    Image(uiImage: uiImage)
+}
+
+// ✅ Good: maxSize で圧縮上限を指定
+.imagePicker(
+    isPresented: $showPicker,
+    selectedImageData: $imageData,
+    maxSize: 1.mb
+)
+
+// ❌ Bad: selectedImageData に UIImage? を使用
+@State private var selectedImage: UIImage? = nil
+
+// ❌ Bad: PHPicker を直接使用（権限処理なし）
 .sheet(isPresented: $showPicker) {
     PHPickerViewController(...)
 }
+
+// ❌ Bad: isPresented を省略して直接バインディングだけ渡す
+.imagePicker($selectedImage)
 ```
