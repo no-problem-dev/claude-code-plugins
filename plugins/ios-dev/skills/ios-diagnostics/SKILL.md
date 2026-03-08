@@ -1,82 +1,32 @@
 ---
 name: ios-diagnostics
-description: iOS プロジェクトのエラー・警告診断。「check」「errors」「warnings」「diagnostics」「issues」「compile check」「lint」「エラーチェック」「コンパイルチェック」「警告チェック」などのキーワードで自動適用。Xcode MCP 利用可能時はライブ診断、不可時は CLI フォールバック。
+description: iOS プロジェクトのエラー・警告を XcodeBuildMCP 経由で診断する。「check」「errors」「warnings」「diagnostics」「issues」「compile check」「lint」「エラーチェック」「コンパイルチェック」「警告チェック」などのキーワードで自動適用。
 ---
 
-# iOS 診断（ios-check 後継 + MCP 診断）
+# iOS 診断（XcodeBuildMCP）
 
-プロジェクトのエラー・警告を高速にチェックする。
+プロジェクトのエラー・警告を検出するための軽量診断。
+
+## 方式
+
+xbm-build サブエージェントを使用してビルドを実行し、エラー・警告を検出する。
+ビルドログはサブエージェント内で消費され、構造化された診断結果のみが返却される。
 
 ## ワークフロー
 
-### Step 0: MCP 可用性チェック
+### エラー・警告チェック
+
+xbm-build をフォアグラウンドで起動:
 
 ```
-XcodeListWindows を試行
-  → 成功: MCP 診断を使用
-  → 失敗: CLI フォールバック
+Agent(
+  subagent_type: "ios-dev:xbm-build",
+  prompt: "以下のプロジェクトをビルドし、エラーと警告を報告してください。\n警告も詳細に報告してください。\nプロジェクトパス: <path>"
+)
 ```
 
-### MCP 利用可能な場合
+### 結果の解釈
 
-#### Xcode Issue Navigator のエラー・警告一覧
-```
-XcodeListNavigatorIssues を呼び出し
-→ Xcode が認識している全エラー・警告を一覧表示
-```
-
-#### 特定ファイルのライブ診断
-```
-XcodeRefreshCodeIssuesInFile(filePath: "/path/to/File.swift") を呼び出し
-→ そのファイルのリアルタイム診断結果を取得
-```
-
-### CLI フォールバック（MCP 利用不可の場合）
-
-#### 1. プロジェクト検出
-```bash
-# xcworkspace（.xcodeproj/project.xcworkspace は除外）
-find . -maxdepth 2 -name "*.xcworkspace" -type d | grep -v ".xcodeproj/project.xcworkspace"
-# xcodeproj
-find . -maxdepth 2 -name "*.xcodeproj" -type d
-```
-
-#### 2. 高速スキーム検出
-ワークスペース/プロジェクト名から推測。`xcodebuild -list` は最終手段。
-
-#### 3. コンパイルチェック
-```bash
-xcodebuild \
-  -workspace <name>.xcworkspace \
-  -scheme <scheme> \
-  -destination "platform=iOS Simulator,id=<id>" \
-  -skipMacroValidation \
-  -skipPackagePluginValidation \
-  -skipPackageUpdates \
-  build 2>&1 | grep -E "(error:|warning:)" | head -50
-```
-
-#### SPM プロジェクト
-```bash
-swift build 2>&1 | grep -E "(error:|warning:)"
-```
-
-## 出力フォーマット
-
-```
-## 診断結果
-
-### エラー (N件)
-<file>:<line>: error: <message>
-
-### 警告 (N件)
-<file>:<line>: warning: <message>
-
-### 修正提案
-<recommendations>
-```
-
-エラー・警告がない場合:
-```
-## 診断結果: 問題なし ✓
-```
+- エラーあり → コード修正を提案
+- 警告のみ → 重要度を判定し、修正すべきものを提案
+- 問題なし → 「診断結果: 問題なし」と報告

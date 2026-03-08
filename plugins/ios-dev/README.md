@@ -1,93 +1,75 @@
-# ios-dev v2.0
+# ios-dev v3.0
 
-iOS/Swift/Xcode のビルド・テスト・診断・プレビュー。Xcode MCP ハイブリッド対応。
+XcodeBuildMCP ベースの iOS 開発ワークフロー。フォアグラウンドサブエージェントによるコンテキスト隔離設計。
 
-## インストール
+## 前提条件
 
-Claude Code の `/plugins` UI からインストール、または:
-
-```bash
-claude plugins:install ios-dev
-```
-
-## MCP ハイブリッド設計
-
-Xcode 26.3 の公式 MCP サーバー（`xcrun mcpbridge`）が利用可能な場合は MCP を優先し、
-利用不可の場合は CLI にフォールバックする。**MCP がなくてもビルド・テストは必ず動く。**
-
-### セットアップ（MCP 機能を使う場合）
+XcodeBuildMCP が MCP サーバーとして登録されていること:
 
 ```bash
-claude mcp add xcode -- xcrun mcpbridge
+# インストール
+brew tap getsentry/xcodebuildmcp && brew install xcodebuildmcp
+
+# MCP サーバー登録
+claude mcp add XcodeBuildMCP -- xcodebuildmcp mcp
 ```
 
-## サブエージェント（ビルド・テスト用）
+CLI フォールバックはありません。XcodeBuildMCP が必須です。
 
-ビルドやテストは **サブエージェント** で実行。独立したコンテキストで動作し、メインの会話を消費しない。
+## 設計思想
 
-| エージェント | 用途 | モデル |
+ビルド・テスト等の重い MCP 操作は**フォアグラウンドサブエージェント**に委譲し、
+ビルドログ等のコンテキスト消費をサブエージェント内に隔離する。
+メインコンテキストには構造化されたサマリーのみが返却される。
+
+## サブエージェント
+
+| エージェント | 責務 | モデル |
 |-------------|------|--------|
-| **ios-build-runner** | iOS アプリ / SPM ビルド | Sonnet |
-| **ios-test-runner** | ユニットテスト実行 | Sonnet |
+| **xbm-build** | ビルド実行 & エラー報告 | Sonnet |
+| **xbm-test** | テスト実行 & 結果報告 | Sonnet |
+| **xbm-run** | ビルド & シミュレータ実行 & スクショ | Sonnet |
+| **xbm-project-setup** | プロジェクト検出 & セッション設定 | Sonnet |
+| **xbm-ui-verify** | UI 検証（スクショ + ビュー階層 + 操作） | Sonnet |
 
 ### 使用例
 
 ```
 「ビルドして」
-→ ios-build-runner が xcworkspace を検出 → MCP or CLI でビルド → サマリー返却
+  → xbm-build が XcodeBuildMCP でビルド → サマリー返却
 
 「テストして」
-→ ios-test-runner が MCP テスト or xcodebuild test で実行 → 結果サマリー返却
+  → xbm-test が XcodeBuildMCP でテスト → 結果サマリー返却
 
-「サーバーをビルドして」
-→ ios-build-runner が Package.swift を検出 → swift build で実行
+「実行して画面見せて」
+  → xbm-run がビルド・起動・スクショ → 画像付きサマリー返却
+
+「スキーム一覧教えて」
+  → xbm-project-setup がプロジェクト情報取得 → 構造化情報返却
 ```
 
 ## スキル
 
-| スキル | 用途 | MCP |
-|--------|------|-----|
-| **ios-dev-workflow** | 全体のオーケストレーション・使い分けガイド | — |
-| **ios-diagnostics** | エラー・警告チェック | MCP 優先 |
-| **ios-preview-repl** | SwiftUI プレビュー・REPL・Apple ドキュメント | MCP 必須 |
-| **ios-project-info** | スキーム・シミュレータ・ビルド設定一覧 | CLI 専用 |
-| **ios-maintenance** | キャッシュクリア・シミュレータ管理 | CLI 専用 |
+| スキル | 用途 |
+|--------|------|
+| **ios-dev-workflow** | オーケストレーター（サブエージェント振り分け） |
+| **ios-diagnostics** | エラー・警告チェック（xbm-build に委譲） |
+| **ios-preview-repl** | SwiftUI プレビュー・REPL・Apple ドキュメント（Xcode ネイティブ MCP） |
+| **ios-project-info** | プロジェクト情報（xbm-project-setup に委譲） |
+| **ios-maintenance** | クリーン・シミュレータ管理（軽量 MCP 直接呼び出し） |
 
-## プロジェクト検出順序
+## 推奨ワークフロー
 
-1. **xcworkspace**（最優先）— `.xcodeproj/project.xcworkspace` は除外
-2. **xcodeproj** — ワークスペースがない場合
-3. **Package.swift** — 純粋な SPM プロジェクト
-
-## 対応プロジェクト構成
-
-### iOS + Server-side Swift
 ```
-project/
-├── Project.xcworkspace    ← iOS ビルド
-├── iOS/
-│   ├── App.xcodeproj
-│   └── Packages/
-├── Server/
-│   └── Package.swift      ← SPM ビルド
-└── Shared/
-    └── Package.swift
-```
-
-### iOS のみ（xcworkspace / xcodeproj）
-```
-project/
-├── Project.xcworkspace
-└── iOS/
-    └── App.xcodeproj
-```
-
-### Swift Package のみ
-```
-project/
-├── Package.swift
-├── Sources/
-└── Tests/
+コード変更
+    |
+xbm-build（ビルド）
+    | 成功
+xbm-test（テスト）
+    | 全パス
+完了
+    | 失敗
+エラー分析 → コード修正 → 再ビルド
 ```
 
 ## プラグイン構成
@@ -97,37 +79,34 @@ ios-dev/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── agents/
-│   ├── ios-build-runner.md    # ビルド（iOS + SPM 統合）
-│   └── ios-test-runner.md     # テスト
+│   ├── xbm-build.md           # ビルド実行
+│   ├── xbm-test.md            # テスト実行
+│   ├── xbm-run.md             # ビルド & 実行
+│   ├── xbm-project-setup.md   # プロジェクト情報
+│   └── xbm-ui-verify.md       # UI 検証
 ├── skills/
-│   ├── ios-dev-workflow/      # オーケストレーター
-│   ├── ios-diagnostics/       # エラー・警告チェック
-│   ├── ios-preview-repl/      # プレビュー・REPL・ドキュメント
-│   ├── ios-project-info/      # プロジェクト情報
-│   └── ios-maintenance/       # クリーン・シミュレータ管理
+│   ├── ios-dev-workflow/       # オーケストレーター
+│   ├── ios-diagnostics/        # 診断
+│   ├── ios-preview-repl/       # プレビュー・REPL
+│   ├── ios-project-info/       # プロジェクト情報
+│   └── ios-maintenance/        # メンテナンス
 └── README.md
 ```
 
-## 推奨ワークフロー
+## MCP 構成
 
-```
-コード変更
-    ↓
-ios-build-runner（ビルド）
-    ↓ 成功
-ios-test-runner（テスト）
-    ↓ 全テストパス
-コミット・PR
-```
+| MCP サーバー | 用途 | 必須 |
+|-------------|------|:---:|
+| **XcodeBuildMCP** | ビルド・テスト・実行・UI 操作 | 必須 |
+| **xcode (xcrun mcpbridge)** | SwiftUI プレビュー・REPL・Apple ドキュメント | 任意 |
 
-## v1.x からの変更点
+## v2.x からの変更点
 
-- `swift-build-runner` を `ios-build-runner` に統合
-- `commands/` を全削除 → `skills/` に移行
-- Xcode MCP サーバー対応（ハイブリッド設計）
-- SwiftUI プレビュー・REPL・Apple ドキュメント検索を追加
-- プロジェクト情報スキル（スキーム・シミュレータ・ビルド設定）を追加
-- シミュレータ管理機能を追加
+- CLI フォールバック廃止 → XcodeBuildMCP 必須
+- Xcode ネイティブ MCP でのビルド・テスト廃止 → XcodeBuildMCP に統合
+- ios-build-runner / ios-test-runner 廃止 → xbm-build / xbm-test / xbm-run / xbm-project-setup / xbm-ui-verify に再編
+- サブエージェントから MCP ツール直接呼び出し（フォアグラウンド実行）
+- UI 検証エージェント追加（スクリーンショット + ビュー階層 + UI 操作）
 
 ## 関連プラグイン
 

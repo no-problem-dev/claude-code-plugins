@@ -1,69 +1,34 @@
 ---
 name: ios-project-info
-description: iOS プロジェクトのスキーム・ターゲット・シミュレータ・ビルド設定を表示。「scheme」「target」「simulator」「destination」「bundle ID」「build settings」「スキーム一覧」「ターゲット一覧」「シミュレータ一覧」「ビルド設定」などのキーワードで自動適用。CLI 専用スキル。
+description: iOS プロジェクトのスキーム・ターゲット・シミュレータ・ビルド設定を XcodeBuildMCP 経由で表示。「scheme」「target」「simulator」「destination」「bundle ID」「build settings」「スキーム一覧」「ターゲット一覧」「シミュレータ一覧」「ビルド設定」などのキーワードで自動適用。
 ---
 
-# iOS プロジェクト情報（CLI 専用）
+# iOS プロジェクト情報（XcodeBuildMCP）
 
-プロジェクトのスキーム・ターゲット・デスティネーション・ビルド設定を取得する。
-これらの情報は MCP では取得できないため、CLI 固定。
+プロジェクトの構成情報を XcodeBuildMCP 経由で取得する。
 
-## コマンド一覧
+## 方式
 
-### スキーム・ターゲット一覧
-```bash
-xcodebuild -list -workspace <name>.xcworkspace -json
-# or
-xcodebuild -list -project <name>.xcodeproj -json
+xbm-project-setup サブエージェントに委譲し、コンテキストを隔離する。
+
+## ワークフロー
+
+### プロジェクト情報取得
+
+```
+Agent(
+  subagent_type: "ios-dev:xbm-project-setup",
+  prompt: "以下のプロジェクトの情報を取得してください。\nプロジェクトパス: <path>\n取得内容: <schemes / simulators / build settings / bundle id / all>"
+)
 ```
 
-**注意**: このコマンドは SPM パッケージ解決を実行する可能性があるため、
-高速スキーム検出（名前推測）で十分な場合はそちらを使う。
+### セッションデフォルト設定
 
-### デスティネーション一覧
-```bash
-xcodebuild -showdestinations -workspace <name>.xcworkspace -scheme <scheme>
+開発セッションの開始時にデフォルトを設定し、以降のビルド・テストでパラメータ省略を可能にする:
+
 ```
-
-### シミュレータ一覧
-```bash
-# 全シミュレータ
-xcrun simctl list devices available -j
-
-# 起動中のシミュレータ
-xcrun simctl list devices booted -j
+Agent(
+  subagent_type: "ios-dev:xbm-project-setup",
+  prompt: "以下のプロジェクトのセッションデフォルトを設定してください。\nプロジェクトパス: <path>\nスキーム: <scheme>\nシミュレータ: <name>"
+)
 ```
-
-### ビルド設定
-```bash
-xcodebuild -showBuildSettings -workspace <name>.xcworkspace -scheme <scheme> -json 2>/dev/null
-```
-
-よく確認される設定:
-- `PRODUCT_BUNDLE_IDENTIFIER`: Bundle ID
-- `MARKETING_VERSION`: バージョン番号
-- `CURRENT_PROJECT_VERSION`: ビルド番号
-- `SDKROOT`: SDK
-- `SWIFT_VERSION`: Swift バージョン
-- `IPHONEOS_DEPLOYMENT_TARGET`: 最小対応 OS
-
-### SPM パッケージ情報
-```bash
-swift package describe --type json
-swift package show-dependencies --format json
-```
-
-## プロジェクト検出
-
-```bash
-# xcworkspace（.xcodeproj/project.xcworkspace は除外）
-find . -maxdepth 2 -name "*.xcworkspace" -type d | grep -v ".xcodeproj/project.xcworkspace"
-# xcodeproj
-find . -maxdepth 2 -name "*.xcodeproj" -type d
-# Package.swift
-ls Package.swift Server/Package.swift Backend/Package.swift 2>/dev/null
-```
-
-## 出力フォーマット
-
-必要な情報のみ簡潔に返す。フルダンプは避ける。
