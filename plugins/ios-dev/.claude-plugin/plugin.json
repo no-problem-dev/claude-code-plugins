@@ -1,7 +1,7 @@
 {
   "name": "ios-dev",
-  "version": "2.0.0",
-  "description": "iOS/Swift/Xcode のビルド・テスト・診断・プレビュー。Xcode MCP ハイブリッド対応（MCP 優先、CLI フォールバック）。xcworkspace / xcodeproj / SPM 自動検出。",
+  "version": "3.0.0",
+  "description": "XcodeBuildMCP ベースの iOS 開発ワークフロー。フォアグラウンドサブエージェントによるコンテキスト隔離設計。ビルド・テスト・実行・UI 検証を MCP 経由で実行し、ログはサブエージェント内で消費。",
   "author": {
     "name": "no-problem",
     "email": "info@no-problem-net.com"
@@ -10,19 +10,23 @@
     "ios",
     "swift",
     "xcode",
-    "xcodebuild",
-    "xcworkspace",
-    "spm",
+    "xcodebuildmcp",
+    "mcp",
     "simulator",
     "build",
     "test",
     "preview",
     "swiftui",
     "diagnostics",
-    "mcp",
-    "server-side-swift",
-    "vapor"
+    "ui-automation",
+    "spm"
   ],
   "skills": "./skills/",
-  "agents": ["./agents/ios-build-runner.md", "./agents/ios-test-runner.md"]
+  "agents": [
+    "./agents/xbm-build.md",
+    "./agents/xbm-test.md",
+    "./agents/xbm-run.md",
+    "./agents/xbm-project-setup.md",
+    "./agents/xbm-ui-verify.md"
+  ]
 }

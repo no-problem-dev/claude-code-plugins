@@ -1,107 +1,56 @@
 ---
 name: ios-maintenance
-description: iOS ビルドキャッシュクリア・DerivedData 削除・シミュレータ管理。「clean」「DerivedData」「cache」「キャッシュ」「クリーン」「simulator boot」「simulator reset」「シミュレータ起動」「シミュレータリセット」などのキーワードで自動適用。ios-clean の後継。
+description: iOS ビルドキャッシュクリア・シミュレータ管理を XcodeBuildMCP 経由で実行。「clean」「DerivedData」「cache」「キャッシュ」「クリーン」「simulator boot」「simulator reset」「シミュレータ起動」「シミュレータリセット」などのキーワードで自動適用。
 ---
 
-# iOS メンテナンス（ios-clean 後継 + シミュレータ管理）
+# iOS メンテナンス（XcodeBuildMCP）
 
 ビルドキャッシュのクリアとシミュレータの管理。
+軽量操作のためメインコンテキストで直接 MCP ツールを呼び出す。
 
-## ビルドキャッシュクリア
+## ビルドクリーン
 
-### 基本クリーン
-```bash
-# プロジェクト検出
-WORKSPACE=$(find . -maxdepth 2 -name "*.xcworkspace" -type d | grep -v ".xcodeproj/project.xcworkspace" | head -1)
-
-# xcodebuild clean
-xcodebuild clean -workspace "$WORKSPACE" -scheme <scheme> 2>&1 | tail -5
+### XcodeBuildMCP でクリーン
+```
+ToolSearch("select:mcp__XcodeBuildMCP__clean")
+clean(scheme: "<scheme>")
 ```
 
-### 深いクリーン（DerivedData 削除）
+### DerivedData 削除（XcodeBuildMCP 外）
+XcodeBuildMCP では DerivedData 直接削除は未サポート。Bash で実行:
 ```bash
-# プロジェクト固有の DerivedData を特定して削除
-# まずプロジェクト名で検索
+# プロジェクト固有
 ls ~/Library/Developer/Xcode/DerivedData/ | grep "<ProjectName>"
 rm -rf ~/Library/Developer/Xcode/DerivedData/<ProjectName>-*
 
-# または全 DerivedData を削除（最終手段）
+# 全削除（確認後のみ）
 rm -rf ~/Library/Developer/Xcode/DerivedData
-```
-
-### SPM キャッシュクリア
-```bash
-# ローカル .build ディレクトリ
-rm -rf .build
-
-# Package.resolved（依存を再解決したい場合）
-rm Package.resolved
-
-# グローバル SPM キャッシュ
-rm -rf ~/Library/Caches/org.swift.swiftpm
 ```
 
 ## シミュレータ管理
 
-### シミュレータ起動
-```bash
-# 特定のシミュレータを起動
-xcrun simctl boot "iPhone 16 Pro"
-
-# Simulator.app を開く
-open -a Simulator
+### シミュレータ一覧
+```
+ToolSearch("select:mcp__XcodeBuildMCP__list_sims")
+list_sims()
 ```
 
-### シミュレータ停止
-```bash
-# 特定のシミュレータ
-xcrun simctl shutdown "iPhone 16 Pro"
-
-# 全シミュレータ
-xcrun simctl shutdown all
+### シミュレータ起動
+```
+ToolSearch("select:mcp__XcodeBuildMCP__boot_sim,mcp__XcodeBuildMCP__open_sim")
+boot_sim(simulator_name: "iPhone 16 Pro")
+open_sim()
 ```
 
 ### シミュレータリセット
-```bash
-# 特定のシミュレータのデータをリセット
-xcrun simctl erase "iPhone 16 Pro"
-
-# 全シミュレータをリセット
-xcrun simctl erase all
 ```
-
-### シミュレータ一覧
-```bash
-xcrun simctl list devices available
+ToolSearch("select:mcp__XcodeBuildMCP__erase_sims")
+erase_sims(simulator_name: "iPhone 16 Pro")
 ```
-
-## アプリ操作（シミュレータ上）
-
-### アプリインストール
-```bash
-xcrun simctl install booted <path-to-.app>
-```
-
-### アプリ起動
-```bash
-xcrun simctl launch booted <bundle-identifier>
-```
-
-### スクリーンショット
-```bash
-xcrun simctl io booted screenshot screenshot.png
-```
-
-## 使用タイミング
-
-- ビルドが不安定な時 → 基本クリーン
-- キャッシュ起因のエラー / ブランチ切り替え後のエラー → 深いクリーン
-- ディスク容量確保 → DerivedData + SPM キャッシュ削除
-- シミュレータが応答しない → シミュレータリセット
-- 特定の OS バージョンでテストしたい → シミュレータ起動
 
 ## 注意事項
 
 - `rm -rf` 系のコマンドは実行前にユーザーに確認すること
-- DerivedData 全削除は他の Xcode プロジェクトにも影響する
+- DerivedData 全削除は他プロジェクトにも影響する
 - シミュレータリセットはアプリデータが全て消える
+- simulator-management ワークフローの有効化が必要な操作がある
