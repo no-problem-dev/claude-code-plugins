@@ -71,6 +71,14 @@
       "source": "./plugins/deploy-to-codex",
       "category": "tooling",
       "tags": ["codex", "openai", "deploy", "convert", "migration", "skills", "agents"]
+    },
+    {
+      "name": "ios-qa-agent",
+      "description": "AI による自律的な iOS アプリ QA - 自然言語テストケースを解釈し、XcodeBuildMCP で UI を操作し、期待結果を独立判定。実行と判定を分離し確認バイアスを排除",
+      "version": "1.0.0",
+      "source": "./plugins/ios-qa-agent",
+      "category": "development",
+      "tags": ["ios", "qa", "testing", "ai-agent", "xcodebuildmcp", "ui-automation", "e2e", "intent-based-testing"]
     }
   ]
 }
