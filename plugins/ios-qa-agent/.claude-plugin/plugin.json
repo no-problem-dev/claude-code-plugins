@@ -1,0 +1,24 @@
+{
+  "name": "ios-qa-agent",
+  "version": "1.0.0",
+  "description": "AI による自律的な iOS アプリ QA。自然言語テストケースを解釈し、XcodeBuildMCP で UI を操作し、期待結果を独立判定する。実行と判定を分離し、確認バイアスを排除する設計。",
+  "author": {
+    "name": "no-problem",
+    "email": "info@no-problem-net.com"
+  },
+  "keywords": [
+    "ios",
+    "qa",
+    "testing",
+    "ai-agent",
+    "xcodebuildmcp",
+    "ui-automation",
+    "e2e",
+    "intent-based-testing"
+  ],
+  "skills": "./skills/",
+  "agents": [
+    "./agents/qa-runner.md",
+    "./agents/qa-judge.md"
+  ]
+}
