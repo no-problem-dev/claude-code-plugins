@@ -83,6 +83,18 @@ ios-dev プラグインがある場合:
 
 scheme / simulator 情報を記憶。
 
+### Phase 2.5: App Map 一括注入の効率化（Phase 5）
+
+App Map 注入をワンタイムで実施:
+
+1. Phase 1 で app-map.md を Read したら、メモリ（コンテキスト）に保存
+2. Phase 3 ループ内で全テストケースの qa-runner prompt に同じ App Map を注入
+3. テストごとに Read し直さない（トークン効率向上）
+
+メリット:
+- トークン削減: Read × テスト数 を削減
+- 一貫性: 全テストが同じ App Map バージョンで実行
+
 ### Phase 3: テストケース実行ループ（ios-qa-execute の知識を適用）
 
 実行順序に従い、各テストケースを処理:
@@ -161,7 +173,67 @@ for each test_case:
 
 **実装注:** このフェーズはオプション。テストスイート実行時のみ適用。単一ケース実行時はスキップ。
 
-### Phase 4: レポート生成（ios-qa-report の知識を適用）
+### Phase 3.5: 全体タイムアウト管理（Phase 5：連続実行の安定化）
+
+全テストスイート実行に対する全体タイムアウトを設定:
+
+**設定値:**
+- デフォルト: 900秒（15分）
+- ユーザーが指定した場合はそれを使用
+
+**タイムアウト判定ロジック:**
+```
+for each test_case in remaining_tests:
+  elapsed_time = 現在時刻 - 実行開始時刻
+  remaining_time = total_timeout - elapsed_time
+
+  # 残りテストの平均実行時間を推定
+  avg_time_per_test = 3分（デフォルト推定値）
+  estimated_remaining_time = avg_time_per_test × len(remaining_tests)
+
+  if estimated_remaining_time > remaining_time:
+    # 時間不足の場合、残りテストを Skipped にする
+    for test in remaining_tests:
+      result.append(Skipped, reason: "全体タイムアウトによるスキップ")
+    break
+  else:
+    # テスト実行を続行
+    run_test(test_case)
+```
+
+**警告メッセージ:**
+```
+実行時間が圧迫しています。残り 10分で 5 件のテストが残っています。
+以下のテストをスキップします: TC-004, TC-005
+```
+
+### Phase 4: 中間レポート（Phase 5：5件超の場合）
+
+テストスイート内に 5 件を超えるテストがある場合、5 件ごとに中間サマリーを出力:
+
+**中間サマリーの内容:**
+```
+## 中間レポート（TC-001 ~ TC-005）
+
+| TC-ID | 結果 | Priority | 実行時間 |
+|-------|------|----------|---------|
+| TC-001 | Pass | critical | 45s |
+| TC-002 | Pass | high | 52s |
+| TC-003 | Fail | medium | 38s |
+| TC-004 | Skipped | high | - |
+| TC-005 | Inconclusive | medium | 55s |
+
+**累計:** 3 Pass, 1 Fail, 1 Inconclusive, 1 Skipped / 実行時間: 190s
+
+---
+```
+
+**出力タイミング:**
+- TC-005 完了時：「中間レポート（TC-001 ~ TC-005）」
+- TC-010 完了時：「中間レポート（TC-006 ~ TC-010）」
+- 最後は Phase 5（最終レポート）で全体サマリー
+
+### Phase 5: レポート生成（ios-qa-report の知識を適用）
 
 全テスト結果を集約してレポートを出力。
 
@@ -180,17 +252,22 @@ ToolSearch("select:mcp__XcodeBuildMCP__stop_app_sim,mcp__XcodeBuildMCP__launch_a
 stop_app_sim() → launch_app_sim()
 ```
 
-## コンテキスト効率
+## コンテキスト効率（Phase 5：App Map 一括注入）
 
-| 要素 | トークン消費 |
-|------|------------|
-| テストケース読み込み | 200-500 / 件 |
-| qa-runner 結果 | 500-1,000 / 件 |
-| qa-judge 結果 | 300-500 / 件 |
-| レポート生成 | 1,000-3,000 |
-| **10件実行時の合計** | **約 13,000-23,000** |
+| 要素 | トークン消費 | 最適化前 | 最適化後 | 削減量 |
+|------|------------|---------|---------|-------|
+| App Map 読み込み | 300-600 × 1回 | 300-600 × N件 | 300-600 × 1回 | N-1 回分削減 |
+| テストケース読み込み | 200-500 / 件 | 変わらず | 変わらず | - |
+| qa-runner 結果 | 500-1,000 / 件 | 変わらず | 変わらず | - |
+| qa-judge 結果 | 300-500 / 件 | 変わらず | 変わらず | - |
+| レポート生成 | 1,000-3,000 | 変わらず | 変わらず | - |
+| **10件実行時の合計** | **約 13,000-23,000** | - | **約 12,800-22,400** | **約 200-600（1回分）** |
 
 UI 操作ログ（snapshot_ui × N）は qa-runner 内で完全消費。
+
+**Phase 5 での効率化:**
+- App Map の一括注入で 1回分の Read トークンを削減
+- 中間レポートは 5件超の大規模スイートでのみ実施（小規模スイートではレポート生成量は変わらず）
 
 ## 重要: qa-runner への期待結果の非開示
 

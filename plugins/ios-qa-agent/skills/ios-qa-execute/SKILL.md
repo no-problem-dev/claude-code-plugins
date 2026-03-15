@@ -85,32 +85,66 @@ Agent(
 1. qa-judge の Judgment を results に追加
 2. qa-runner の Execution Report から Discoveries セクションを抽出して保管（Phase 3.5 で集約用）
 
-## アプリ状態管理
+## アプリ状態管理（Phase 5：連続実行の安定化）
+
+### テスト実行前の状態確認ステップ
+
+各テストケース実行前に以下を実施:
+
+1. **screenshot()** で現在画面を確認
+2. 期待する開始画面と比較
+3. 不一致の場合:
+   - `stop_app_sim()` で停止
+   - 2秒待機
+   - `launch_app_sim()` で再起動
+   - `screenshot()` で起動確認
+
+### State Transition Hints（App Map 活用）
+
+前テスト結果画面 → 次テスト開始画面への遷移ヒント:
+
+1. App Map の Transitions セクションを参照
+2. 「home に戻る」等の推奨操作を特定
+3. 例:
+   - session_active にいる → backButton タップで home に戻す
+   - settings 画面 → navigationBar の戻るボタンで前画面に戻す
+4. qa-runner の Execution Report に「状態遷移に必要な操作」を記載
 
 ### 再起動が必要な場合
 
 - 前テストの Verdict が Fail
 - 前テストの Runner Status が crashed
 - 前テストと次テストの preconditions が大きく異なる
+- screenshot() で確認したアプリ状態が期待状態と不一致
 
 ### 再起動不要な場合
 
 - 前テストが Pass かつ次テストの preconditions が互換
+- screenshot() で確認した状態が次テストの期待開始画面と一致
 
 ### 再起動の実行
 
 ```
-stop_app_sim() → 2秒待機 → launch_app_sim()
-→ screenshot() で起動確認
+screenshot() → 期待画面確認
+if 不一致 or アプリクラッシュ:
+  stop_app_sim()
+  待機 2秒
+  launch_app_sim()
+  screenshot() で起動確認
 ```
 
-## 依存テストの扱い
+## 依存テストの扱い（Phase 5：独立テストの Fail 後続行）
 
-depends_on で指定されたテストが:
-- Pass → 実行
-- Fail → Skipped（理由: 依存先 [TC-XXX] が失敗）
-- Inconclusive → Skipped（理由: 依存先 [TC-XXX] が判定不能）
-- Skipped → Skipped（理由: 依存先 [TC-XXX] がスキップ）
+**depends_on がないテストの場合:**
+- 前テストが Fail でも実行を続行
+- 理由: 独立したテストケースとして扱う
+
+**depends_on があるテストの場合:**
+- 依存先テストが以下の場合 Skipped:
+  - Fail → Skipped（理由: 依存先 [TC-XXX] が失敗）
+  - Inconclusive → Skipped（理由: 依存先 [TC-XXX] が判定不能）
+  - Skipped → Skipped（理由: 依存先 [TC-XXX] がスキップ）
+- 依存先が Pass の場合：実行
 
 ## リトライの扱い
 
@@ -118,3 +152,22 @@ retry > 0 かつ Fail/Inconclusive の場合:
 - アプリを再起動
 - 同じテストケースを再実行（最大 retry 回）
 - 最後の結果を採用
+
+## 進捗報告（Phase 5：中途報告）
+
+各テスト完了後に簡潔な進捗を親エージェント（ios-qa-workflow）に報告:
+
+```
+例: "TC-001: Pass (high) | TC-002: 実行中... | 残り 3 件"
+```
+
+**報告タイミング:**
+- 各テスト完了時
+- 5件以上のスイート実行時のみ（小規模スイートでは不要）
+
+**報告内容:**
+- TC ID
+- Verdict（Pass / Fail / Inconclusive / Skipped）
+- Priority（high / medium / low）
+- 実行ステータス（完了 / 実行中 / Skipped）
+- 残りテスト数
