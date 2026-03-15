@@ -39,6 +39,37 @@ Phase 3: レポート → ios-qa-report スキルの知識で実行
 
 ## ワークフロー
 
+### Phase 0 (ホーム): 回帰テストモード判定
+
+**実行タイミング:** ワークフロー開始時
+
+ユーザー指示を解析し、回帰テストモードを判定:
+
+```
+REGRESSION_MODE = false
+
+if ユーザー指示に以下のキーワード:
+  - "回帰テスト"
+  - "regression test"
+  - "regression"
+  - "差分テスト"
+  - "差分確認"
+THEN
+  REGRESSION_MODE = true
+  通知: "回帰テストモードで実行します。App Map 差分分析を先に実施します。"
+END IF
+```
+
+**回帰テストモード有効時の処理:**
+
+1. Phase 0.5（ios-qa-prepare の App Map 差分分析）を実行
+2. 差分分析レポートを出力
+3. 影響テストケースを抽出
+4. 以下のいずれかをユーザーに提示:
+   - **オプション A**: 影響テストケースのみを実行（高速回帰テスト）
+   - **オプション B**: 影響テストケース + 全テストスイート実行（完全回帰テスト）
+   - **オプション C**: すべてをスキップし、差分分析レポートのみ出力
+
 ### Phase 0: QA Readiness 検査（条件付き実行）
 
 以下のいずれかに該当する場合、Phase 0 を実行:
@@ -97,10 +128,26 @@ App Map 注入をワンタイムで実施:
 
 ### Phase 3: テストケース実行ループ（ios-qa-execute の知識を適用）
 
-実行順序に従い、各テストケースを処理:
+実行順序に従い、各テストケースを処理。回帰テストモード有効時は影響テストケースを優先:
 
 ```
-for each test_case:
+# 回帰テストモード: 影響テストケース優先
+if REGRESSION_MODE:
+  affected_tests = Phase 0.5 の差分分析から抽出
+  test_execution_order = [
+    *affected_tests (優先度順),
+    *remaining_tests (元の優先度順)
+  ]
+else:
+  test_execution_order = 元の優先度順
+
+for each test_case in test_execution_order:
+
+  # 回帰テストモード: 変更なしテストをスキップ提案
+  if REGRESSION_MODE and test_case not in affected_tests:
+    if ユーザー指示が「影響テストケースのみ」:
+      Skip（理由: App Map 差分なし）
+      continue
 
   # 依存チェック
   if depends_on が Fail/Inconclusive → Skipped
