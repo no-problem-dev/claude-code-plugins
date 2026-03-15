@@ -24,9 +24,24 @@ Agent(
     ### 操作意図
     {テストケースの操作意図}
 
-    ## App Map
+    ## App Map (v4 フォーマット、信頼度情報付き)
     {app-map.md の全内容（あれば）}
+    {
+      例（v4 フォーマット）:
+      ---
+      format_version: 4
+      qa_readiness_score: 72
+      qa_readiness_level: Conditional
+      last_verified: 2026-03-15
+      ---
+    }
     {なければ「App Map は利用不可。フル探索モードで進めてください」と記載}
+
+    ## 信頼度情報の活用
+    以下の信頼度に基づいて、操作方法を自動選択してください:
+    - [HIGH]: label または id で即座にタップ
+    - [MED]: label でタップを試み、失敗時は id にフォールバック
+    - [LOW]: 最初から座標タップを使用
 
     ## 前提条件の達成手順（ヒント）
     {プリセットの steps を展開}
@@ -39,6 +54,12 @@ Agent(
 ```
 
 **重要: 「期待結果」は qa-runner に渡さない（確認バイアス排除）**
+
+**App Map v4 フォーマットの要点:**
+- format_version: 4（信頼度情報をサポート）
+- qa_readiness_score: 数値（0-100、[HIGH]/[MED]/[LOW] の割合を反映）
+- qa_readiness_level: Low / Conditional / High（テスト実行推奨度）
+- 各要素に信頼度 [HIGH]/[MED]/[LOW] が付与されている
 
 ### Step B: qa-judge（判定）
 
