@@ -97,6 +97,52 @@ timeout_seconds: 120
 - 複雑なバリデーションのテストではない。入力可能性のみを確認
 ```
 
+## App Map 機構
+
+### 概要
+
+**App Map** は、テストで発見した画面・要素・遷移を自動集約するナレッジベース。
+
+- テスト実行時に `Discoveries` として新規発見を報告
+- Phase 3.5 で自動マージして app-map.md を更新
+- 次回以降のテストで qa-runner が App Map を参考情報として活用
+- フル探索 → 段階的な効率化を実現
+
+### ファイル形式
+
+```markdown
+---
+version: 1.0.0
+last_updated: YYYY-MM-DD HH:MM
+screens_count: N
+elements_per_screen_avg: M
+---
+
+# App Map
+
+## スクリーン一覧
+
+### [スクリーン名]
+- **識別条件**: [識別パターン・判定ロジック]
+- **主要素**:
+  - [要素名] ([タイプ]): [説明]
+
+## 遷移グラフ
+
+[スクリーン A] —tap "Button B"→ [スクリーン C]
+
+## Operation Patterns
+
+### [パターン名]
+[操作の効率的な手順]
+```
+
+### 使用方法
+
+1. **qa-runner が参照**: App Map セクションの識別条件・主要素・遷移グラフ・Operation Patterns を参考に効率化
+2. **Discoveries 報告**: App Map に未記録の発見のみを報告（重複排除）
+3. **自動更新**: Phase 3.5 で全 Discoveries をマージ
+
 ## セットアップ
 
 ### 前提条件
@@ -126,13 +172,16 @@ Error: ToolSearch で mcp__XcodeBuildMCP__* が見つからない
 ### qa-judge が Inconclusive で返す
 
 ```
-Verdict: Inconclusive (Key UI Elements 不足)
+Verdict: Inconclusive (Key UI Elements 不足 or 品質チェック Fail)
 ```
 
 **対処**:
 - qa-runner の Final State を確認
 - Key UI Elements が期待結果の検証に必要な要素を含んでいるか確認
-- runner のプロンプトで「期待結果に関連する UI 要素を重点的に列挙」と明記
+- 以下の品質チェックポイントを確認:
+  - 操作結果の要素が含まれているか（例：userMessage バブル）
+  - 状態変化の要素が含まれているか（例：ボタン有効/無効）
+  - ストリーミング操作時に ActivityIndicator の有無が明記されているか
 
 ### テスト間でアプリの状態が異なる
 

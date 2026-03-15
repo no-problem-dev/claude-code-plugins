@@ -24,6 +24,10 @@ Agent(
     ### 操作意図
     {テストケースの操作意図}
 
+    ## App Map
+    {app-map.md の全内容（あれば）}
+    {なければ「App Map は利用不可。フル探索モードで進めてください」と記載}
+
     ## 前提条件の達成手順（ヒント）
     {プリセットの steps を展開}
 
@@ -57,7 +61,8 @@ Agent(
 
 ### Step C: 結果の記録
 
-qa-judge の Judgment を results に追加。
+1. qa-judge の Judgment を results に追加
+2. qa-runner の Execution Report から Discoveries セクションを抽出して保管（Phase 3.5 で集約用）
 
 ## アプリ状態管理
 

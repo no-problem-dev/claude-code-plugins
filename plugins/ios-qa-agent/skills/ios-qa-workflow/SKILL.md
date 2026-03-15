@@ -41,9 +41,10 @@ Phase 3: レポート → ios-qa-report スキルの知識で実行
 ### Phase 1: 準備（ios-qa-prepare の知識を適用）
 
 1. テストスイート or テストケースを Read で読み込む
-2. 前提条件プリセットを解決
-3. 依存関係を解決し、実行順序を決定（トポロジカルソート）
-4. skip: true のケースを除外
+2. app-map.md の存在確認（あれば Read で読み込み、qa-runner に提供）
+3. 前提条件プリセットを解決
+4. 依存関係を解決し、実行順序を決定（トポロジカルソート）
+5. skip: true のケースを除外
 
 ### Phase 2: アプリのビルド & 起動
 
@@ -105,6 +106,26 @@ for each test_case:
 
   results.append(judgment)
 ```
+
+### Phase 3.5: App Map 更新（オプション）
+
+全 runner の Discoveries を集約:
+
+1. 全テストケースの Execution Report から Discoveries セクションを抽出
+2. 既存 app-map.md がある場合:
+   - 新規画面・遷移・要素とマージ
+   - 重複排除（既知項目は追加しない）
+3. app-map.md がない場合:
+   - 新規作成（初期化モード）
+4. サイズ制御:
+   - 画面数: 20以内
+   - 要素数: 1画面あたり10以内
+5. メタデータ更新:
+   - version をインクリメント
+   - last_updated を現在時刻に更新
+6. Write で app-map.md を保存
+
+**実装注:** このフェーズはオプション。テストスイート実行時のみ適用。単一ケース実行時はスキップ。
 
 ### Phase 4: レポート生成（ios-qa-report の知識を適用）
 

@@ -52,6 +52,7 @@ retry: 0  # optional
 - スイートファイルの「テストケース一覧」から各ファイルパスを取得
 - 各ファイルを Read で読み込み
 - フロントマターを解析
+- app-map.md の存在確認（同一ディレクトリまたは親ディレクトリ）
 
 ### 2. 前提条件の解決
 
@@ -74,6 +75,11 @@ retry: 0  # optional
 ### App
 - Scheme: [scheme]
 - Project: [path]
+
+### App Map
+- Available: yes/no
+- Path: [path] (if available)
+- Last Updated: [date] (if available)
 
 ### Test Cases (in execution order)
 | # | ID | Title | Priority | Preconditions | Depends On |
