@@ -194,29 +194,50 @@ for each test_case in test_execution_order:
 
 ### Phase 3.5: App Map 更新（オプション）
 
-全 runner の Discoveries を集約し、App Map v4 フォーマットで更新:
+全 runner の Discoveries を集約し、App Map v5 フォーマットで更新:
+
+**Step 1: Discoveries の収集と分類**
 
 1. 全テストケースの Execution Report から Discoveries セクションを抽出
-2. 既存 app-map.md がある場合:
-   - 新規画面・遷移・要素とマージ
+2. 各発見を以下のカテゴリに分類:
+   - `[interacted]` — 操作して確認済み → 即座に App Map に反映
+   - `[observed]` — snapshot_ui のみで確認 → App Map に `[unverified]` マーク付きで追加
+   - 信頼度変更 — 操作失敗の報告 → App Map の該当要素の信頼度を降格
+
+**Step 2: App Map への統合**
+
+3. 既存 app-map.md がある場合:
+   - `[interacted]` の情報: 既存記録を更新、日付を現在日時に更新
+   - `[observed]` の情報: 新規要素の場合は `[MED, unverified]` マーク付きで追加
+   - 信頼度変更: 該当要素の信頼度を更新、日付も更新
    - 重複排除（既知項目は追加しない）
-   - 信頼度情報を更新（QA Readiness Observations を反映）
-3. app-map.md がない場合:
-   - 新規作成（初期化モード、Phase 0 で生成したものを更新）
-4. **App Map v4 フォーマットで出力:**
-   - フロントマター: `format_version: 4`
+
+4. app-map.md がない場合:
+   - 新規作成（初期化モード）
+
+**Step 3: Known Issues への追記**
+
+5. Runner の Issues/Observations から以下の情報を Operation Patterns の Known Issues に追記:
+   - 座標タップが必須な要素と座標
+   - 操作の落とし穴（例: 自動スクロール後の座標ずれ、クレジット枯渇時の UI 変化）
+   - 非ASCII 入力の必須回避パターン
+
+**Step 4: フォーマット更新**
+
+6. **App Map v5 フォーマットで出力:**
+   - フロントマター: `format_version: 5`
    - QA Readiness Summary を含める（スコア、レベル、日時）
-   - 各要素に信頼度 [HIGH]/[MED]/[LOW] を付与
-   - 各画面に `verified: YYYY-MM-DD` タイムスタンプを記録
-5. サイズ制御:
+   - 各要素に信頼度と日付を付与: `[HIGH, 2026-03-15]`
+   - `[unverified]` マーク付きの要素を Operation Patterns の Known Issues に記載
+7. サイズ制御:
    - 画面数: 20以内
    - 要素数: 1画面あたり10以内
-6. メタデータ更新:
-   - format_version を 4 に統一
+8. メタデータ更新:
+   - format_version を 5 に統一
    - version をインクリメント
    - last_updated を現在時刻に更新
    - qa_readiness_score と qa_readiness_level を更新
-7. Write で app-map.md を保存
+9. Write で app-map.md を保存
 
 **実装注:** このフェーズはオプション。テストスイート実行時のみ適用。単一ケース実行時はスキップ。
 
